@@ -1,11 +1,13 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+
+import { AppQueryProvider } from "../providers/query-provider";
 
 export default function RootLayout() {
-  return (
-    <>
-      <Stack screenOptions={{ headerShown: false }} />
-      <StatusBar style="dark" />
-    </>
-  );
+	return (
+		<AppQueryProvider>
+			<Stack screenOptions={{ headerShown: false }} />
+			<StatusBar style="dark" />
+		</AppQueryProvider>
+	);
 }

@@ -1,56 +1,180 @@
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	ActivityIndicator,
+	Pressable,
+	RefreshControl,
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
+import {
+	getHomeGreeting,
+	homeGreetingQueryKey,
+} from "../features/home/queries";
+import { apiBaseUrl } from "../lib/api";
 
 export default function HomeScreen() {
-  return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>XHS</Text>
-        <Text style={styles.title}>小红书移动端</Text>
-      </View>
+	const queryClient = useQueryClient();
+	const greetingQuery = useQuery({
+		queryKey: homeGreetingQueryKey,
+		queryFn: getHomeGreeting,
+	});
 
-      <View style={styles.panel}>
-        <Text style={styles.panelTitle}>客户端骨架已就绪</Text>
-        <Text style={styles.panelText}>从这里开始搭建推荐流、发布和个人页。</Text>
-      </View>
-    </SafeAreaView>
-  );
+	const errorMessage =
+		greetingQuery.error instanceof Error
+			? greetingQuery.error.message
+			: "请求失败，请稍后重试";
+
+	return (
+		<SafeAreaView style={styles.safeArea}>
+			<ScrollView
+				contentContainerStyle={styles.content}
+				refreshControl={
+					<RefreshControl
+						onRefresh={() => {
+							void greetingQuery.refetch();
+						}}
+						refreshing={greetingQuery.isRefetching}
+					/>
+				}
+			>
+				<View style={styles.header}>
+					<Text style={styles.eyebrow}>XHS Native</Text>
+					<Text style={styles.title}>小红书移动端</Text>
+					<Text style={styles.subtitle}>服务地址：{apiBaseUrl}</Text>
+				</View>
+
+				<View style={styles.panel}>
+					<View style={styles.panelHeader}>
+						<View>
+							<Text style={styles.label}>接口响应</Text>
+							<Text style={styles.url}>{greetingQuery.status}</Text>
+						</View>
+						{greetingQuery.isFetching ? (
+							<ActivityIndicator color="#f25555" />
+						) : null}
+					</View>
+
+					{greetingQuery.isLoading ? (
+						<Text style={styles.body}>正在加载...</Text>
+					) : greetingQuery.isError ? (
+						<Text style={styles.error}>{errorMessage}</Text>
+					) : (
+						<Text style={styles.body}>{greetingQuery.data}</Text>
+					)}
+
+					<Pressable
+						accessibilityRole="button"
+						disabled={greetingQuery.isFetching}
+						onPress={() => {
+							void queryClient.invalidateQueries({
+								queryKey: homeGreetingQueryKey,
+							});
+						}}
+						style={({ pressed }) => [
+							styles.button,
+							pressed || greetingQuery.isFetching ? styles.buttonPressed : null,
+						]}
+					>
+						<Text style={styles.buttonText}>
+							{greetingQuery.isFetching ? "刷新中" : "重新请求"}
+						</Text>
+					</Pressable>
+				</View>
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#fff7f7',
-    padding: 24,
-  },
-  header: {
-    gap: 8,
-    paddingTop: 48,
-    paddingBottom: 32,
-  },
-  brand: {
-    color: '#ff2442',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  title: {
-    color: '#1f1f1f',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  panel: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    gap: 8,
-    padding: 20,
-  },
-  panelTitle: {
-    color: '#1f1f1f',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  panelText: {
-    color: '#5f6368',
-    fontSize: 15,
-    lineHeight: 22,
-  },
+	body: {
+		color: "#202124",
+		fontSize: 18,
+		lineHeight: 26,
+	},
+	button: {
+		alignItems: "center",
+		backgroundColor: "#202124",
+		borderRadius: 8,
+		minHeight: 48,
+		justifyContent: "center",
+		paddingHorizontal: 18,
+	},
+	buttonPressed: {
+		opacity: 0.68,
+	},
+	buttonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "700",
+	},
+	content: {
+		gap: 22,
+		padding: 20,
+		paddingBottom: 36,
+	},
+	error: {
+		color: "#c2362a",
+		fontSize: 16,
+		lineHeight: 24,
+	},
+	eyebrow: {
+		color: "#f25555",
+		fontSize: 13,
+		fontWeight: "700",
+		letterSpacing: 0,
+		textTransform: "uppercase",
+	},
+	header: {
+		gap: 10,
+		paddingTop: 18,
+	},
+	label: {
+		color: "#737373",
+		fontSize: 13,
+		fontWeight: "700",
+		letterSpacing: 0,
+		textTransform: "uppercase",
+	},
+	panel: {
+		backgroundColor: "#fff",
+		borderColor: "#e8e4de",
+		borderRadius: 8,
+		borderWidth: StyleSheet.hairlineWidth,
+		gap: 18,
+		padding: 18,
+		shadowColor: "#000",
+		shadowOffset: { height: 6, width: 0 },
+		shadowOpacity: 0.06,
+		shadowRadius: 18,
+	},
+	panelHeader: {
+		alignItems: "center",
+		flexDirection: "row",
+		gap: 12,
+		justifyContent: "space-between",
+	},
+	safeArea: {
+		backgroundColor: "#fbfaf8",
+		flex: 1,
+	},
+	subtitle: {
+		color: "#5f6368",
+		fontSize: 16,
+		lineHeight: 24,
+	},
+	title: {
+		color: "#202124",
+		fontSize: 32,
+		fontWeight: "800",
+		letterSpacing: 0,
+		lineHeight: 38,
+	},
+	url: {
+		color: "#202124",
+		fontSize: 15,
+		lineHeight: 22,
+	},
 });

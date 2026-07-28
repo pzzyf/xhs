@@ -1,0 +1,4 @@
+interface:
+  display_name: "Native Data Fetch"
+  short_description: "Expo/React Native data fetching with TanStack Query"
+  default_prompt: "Use $native-data-fetch to add mobile-ready TanStack Query data fetching to an Expo React Native app."
