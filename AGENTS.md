@@ -27,6 +27,7 @@
 - Keep TypeScript strictness intact; do not relax shared compiler settings to make a change pass.
 - Follow Biome formatting: tabs for indentation and double quotes in JavaScript/TypeScript.
 - Put shared configuration in `packages/config` only when it is genuinely reused across packages.
+- For commits materially assisted by Codex, append `Co-authored-by: Codex <codex@openai.com>` to the commit message.
 
 ## Native App Rules
 
