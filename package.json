@@ -29,6 +29,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.6",
 		"@xhs/config": "workspace:*",
+		"lefthook": "^2.1.10",
 		"turbo": "^2.10.7",
 		"typescript": "^6.0.3"
 	},
