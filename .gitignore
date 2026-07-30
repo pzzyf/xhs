@@ -12,6 +12,7 @@ lambda.zip
 
 # Expo generated files
 .expo
+expo-env.d.ts
 ios
 android
 
