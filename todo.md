@@ -3,17 +3,18 @@
 ~~turbo~~  
 ~~script~~  
 - expo
-  - app config / env
+
+  - ~~app config / env~~
   - ~~query~~
-  - gesture handler
-  - safe area
+  - ~~gesture handler~~
+  - ~~safe area~~
   - app content
   - dynamic island / notch
   - status bar / navigation bar
   - keyboard
-  - routing
+  - ~~routing~~
   - UI
-  - API base
+  - ~~API base~~
   - local state
   - storage
   - error boundary

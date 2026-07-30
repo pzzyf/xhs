@@ -1,3 +1,4 @@
+import { env } from "@xhs/env/native";
 import { Platform } from "react-native";
 
 const defaultApiBaseUrl = Platform.select({
@@ -6,7 +7,7 @@ const defaultApiBaseUrl = Platform.select({
 });
 
 export const apiBaseUrl = (
-	process.env.EXPO_PUBLIC_API_URL ?? defaultApiBaseUrl
+	env.EXPO_PUBLIC_SERVER_URL ?? defaultApiBaseUrl
 ).replace(/\/$/, "");
 
 type ApiPath = `/${string}`;

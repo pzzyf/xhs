@@ -3,17 +3,15 @@ import {
 	ActivityIndicator,
 	Pressable,
 	RefreshControl,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from "react-native";
-import {
-	getHomeGreeting,
-	homeGreetingQueryKey,
-} from "../features/home/queries";
-import { apiBaseUrl } from "../lib/api";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { getHomeGreeting, homeGreetingQueryKey } from "@/features/home/queries";
+import { apiBaseUrl } from "@/lib/api";
 
 export default function HomeScreen() {
 	const queryClient = useQueryClient();
@@ -143,12 +141,9 @@ const styles = StyleSheet.create({
 		borderColor: "#e8e4de",
 		borderRadius: 8,
 		borderWidth: StyleSheet.hairlineWidth,
+		boxShadow: "0 6px 18px rgba(0, 0, 0, 0.06)",
 		gap: 18,
 		padding: 18,
-		shadowColor: "#000",
-		shadowOffset: { height: 6, width: 0 },
-		shadowOpacity: 0.06,
-		shadowRadius: 18,
 	},
 	panelHeader: {
 		alignItems: "center",

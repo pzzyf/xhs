@@ -1,13 +1,11 @@
+import { env } from "@xhs/env/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 
 export const app = new Hono();
 
-const configuredOrigins = (
-	process.env.CORS_ORIGINS ??
-	process.env.CORS_ORIGIN ??
-	""
-)
+const configuredOrigins = (env.CORS_ORIGINS ?? env.CORS_ORIGIN ?? "")
 	.split(",")
 	.map((origin) => origin.trim())
 	.filter(Boolean);
@@ -17,6 +15,7 @@ const localOriginPattern =
 const privateNetworkOriginPattern =
 	/^https?:\/\/((10|192\.168)\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?$/;
 
+app.use(logger());
 app.use(
 	"*",
 	cors({

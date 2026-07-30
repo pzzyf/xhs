@@ -1,4 +1,4 @@
-import { apiText } from "../../lib/api";
+import { apiText } from "@/lib/api";
 
 export const homeGreetingQueryKey = ["home", "greeting"] as const;
 

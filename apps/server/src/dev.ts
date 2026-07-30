@@ -1,9 +1,10 @@
 import { createServer } from "node:net";
 import { serve } from "@hono/node-server";
+import { env } from "@xhs/env/server";
 
 import { app } from "./app";
 
-const defaultPort = Number(process.env.PORT ?? 3000);
+const defaultPort = env.PORT ?? 3000;
 
 async function isPortAvailable(port: number) {
 	return new Promise<boolean>((resolve) => {
@@ -19,7 +20,7 @@ async function isPortAvailable(port: number) {
 }
 
 async function getPort(port: number) {
-	if (process.env.PORT) {
+	if (env.PORT !== undefined) {
 		return port;
 	}
 

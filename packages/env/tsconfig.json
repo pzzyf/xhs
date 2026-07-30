@@ -1,0 +1,3 @@
+{
+	"extends": "@xhs/config/tsconfig.base.json"
+}
