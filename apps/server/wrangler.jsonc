@@ -1,0 +1,21 @@
+{
+	"name": "xhs-server",
+	"main": "src/worker.ts",
+	"compatibility_date": "2026-08-07",
+	"compatibility_flags": ["nodejs_compat"],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "xhs-d1",
+			"database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID",
+			"migrations_dir": "migrations"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "IMAGES",
+			"bucket_name": "xhs-images",
+			"preview_bucket_name": "xhs-images"
+		}
+	]
+}

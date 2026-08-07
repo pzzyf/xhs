@@ -1,28 +1,28 @@
-import { env } from "@xhs/env/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
-import { auth } from "./lib/auth";
+import { createAuth } from "./lib/auth";
 import { rpcHandler } from "./rpc";
-
-export const app = new Hono();
-
-const configuredOrigins = (env.CORS_ORIGINS ?? env.CORS_ORIGIN ?? "")
-	.split(",")
-	.map((origin) => origin.trim())
-	.filter(Boolean);
+import type { ServerEnv } from "./types";
 
 const localOriginPattern =
 	/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/;
 const privateNetworkOriginPattern =
 	/^https?:\/\/((10|192\.168)\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?$/;
 
+export const app = new Hono<{ Bindings: ServerEnv }>();
+
 app.use(logger());
 app.use(
 	"*",
 	cors({
-		origin: (origin) => {
+		origin: (origin, c) => {
+			const configuredOrigins = (c.env.CORS_ORIGINS ?? c.env.CORS_ORIGIN ?? "")
+				.split(",")
+				.map((item: string) => item.trim())
+				.filter(Boolean);
+
 			if (configuredOrigins.includes("*")) {
 				return "*";
 			}
@@ -63,7 +63,9 @@ app.use("/rpc/*", async (c, next) => {
 	await next();
 });
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", (c) =>
+	createAuth(c.env.DB, c.env).handler(c.req.raw),
+);
 
 app.get("/", (c) => {
 	return c.text("Hello Hono!");

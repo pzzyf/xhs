@@ -3,17 +3,15 @@
 	"type": "module",
 	"main": "src/index.ts",
 	"scripts": {
-		"dev": "tsx watch src/dev.ts",
-		"start": "node dist/dev.mjs",
-		"build": "tsdown && tsdown --config tsdown.lambda.config.ts",
-		"check-types": "tsc -b",
-		"compile": "bun build --compile --minify --sourcemap --bytecode ./src/dev.ts --outfile server",
-		"zip": "zip -j lambda.zip dist/index.mjs",
-		"update": "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
-		"deploy": "bun run build && bun run zip && bun run update"
+		"dev": "wrangler dev --port 3000",
+		"deploy": "wrangler deploy",
+		"d1:migrate:local": "wrangler d1 migrations apply xhs-d1 --local",
+		"d1:migrate:remote": "wrangler d1 migrations apply xhs-d1 --remote",
+		"check-types": "tsc -b"
 	},
 	"dependencies": {
 		"@better-auth/expo": "^1.6.26",
+		"@better-auth/kysely-adapter": "^1.6.26",
 		"@hono/node-server": "^2.0.12",
 		"@orpc/server": "^1.14.15",
 		"@xhs/env": "workspace:*",
@@ -21,13 +19,17 @@
 		"better-auth": "^1.6.26",
 		"dotenv": "catalog:",
 		"hono": "^4.12.32",
+		"kysely": "^0.29.4",
+		"kysely-d1": "^0.4.0",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20260804.1",
 		"@types/node": "catalog:",
 		"@xhs/config": "workspace:*",
 		"tsdown": "^0.22.14",
 		"tsx": "^4.23.1",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"wrangler": "^4.119.0"
 	}
 }

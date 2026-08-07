@@ -42,7 +42,7 @@ export default function SignInScreen() {
 				? await authClient.signIn.email({ email, password })
 				: await authClient.signUp.email({
 						email,
-						name: name.trim(),
+						name: name.trim() || email.split("@")[0],
 						password,
 					});
 
@@ -57,10 +57,7 @@ export default function SignInScreen() {
 		router.replace("/");
 	}
 
-	const canSubmit =
-		email.trim().length > 0 &&
-		password.length >= 6 &&
-		(mode === "sign-in" || name.trim().length > 0);
+	const canSubmit = email.trim().length > 0 && password.length >= 6;
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -93,7 +90,7 @@ export default function SignInScreen() {
 							autoCapitalize="words"
 							autoCorrect={false}
 							onChangeText={setName}
-							placeholder="昵称"
+							placeholder="昵称（选填）"
 							placeholderTextColor={colors.muted}
 							style={styles.input}
 							value={name}

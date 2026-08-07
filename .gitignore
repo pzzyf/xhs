@@ -20,9 +20,14 @@ android
 .env
 .env*.local
 .env.production
+.dev.vars
+.dev.vars*.local
 
 # Local data
 apps/server/data
+
+# Cloudflare
+.wrangler
 
 # IDEs and editors
 .vscode/*
