@@ -13,10 +13,12 @@
 		"deploy": "bun run build && bun run zip && bun run update"
 	},
 	"dependencies": {
+		"@better-auth/expo": "^1.6.26",
 		"@hono/node-server": "^2.0.12",
 		"@orpc/server": "^1.14.15",
 		"@xhs/env": "workspace:*",
 		"@xhs/rpc": "workspace:*",
+		"better-auth": "^1.6.26",
 		"dotenv": "catalog:",
 		"hono": "^4.12.32",
 		"zod": "catalog:"

@@ -10,6 +10,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "../global.css";
 
+import { AuthGate } from "@/features/auth/auth-gate";
+import { GuestSessionProvider } from "@/features/auth/guest-session-provider";
 import { AnonymousSessionProvider } from "@/providers/anonymous-session-provider";
 import { PushBridgeProvider } from "@/providers/push-bridge-provider";
 import { AppQueryProvider } from "@/providers/query-provider";
@@ -37,11 +39,15 @@ export default function RootLayout() {
 						<HeroUINativeProviderRaw>
 							<ToastProvider>
 								<AnonymousSessionProvider>
-									<PushBridgeProvider>
-										<ThemeProvider>
-											<ThemedRoot />
-										</ThemeProvider>
-									</PushBridgeProvider>
+									<GuestSessionProvider>
+										<PushBridgeProvider>
+											<ThemeProvider>
+												<AuthGate>
+													<ThemedRoot />
+												</AuthGate>
+											</ThemeProvider>
+										</PushBridgeProvider>
+									</GuestSessionProvider>
 								</AnonymousSessionProvider>
 								<PortalHost />
 							</ToastProvider>

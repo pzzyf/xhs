@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
 import {
 	ActivityIndicator,
 	Pressable,
@@ -9,7 +10,6 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import {
 	homeGreetingQueryKey,
 	homeGreetingQueryOptions,
@@ -85,6 +85,37 @@ export default function HomeScreen() {
 						</Text>
 					</Pressable>
 				</View>
+
+				<View style={styles.demoSection}>
+					<Text style={styles.label}>输入功能演示</Text>
+					<Pressable
+						accessibilityRole="button"
+						onPress={() => {
+							router.push("/comments");
+						}}
+						style={styles.demoButton}
+					>
+						<Text style={styles.demoButtonText}>💬 评论</Text>
+					</Pressable>
+					<Pressable
+						accessibilityRole="button"
+						onPress={() => {
+							router.push("/chat");
+						}}
+						style={styles.demoButton}
+					>
+						<Text style={styles.demoButtonText}>✉️ 聊天</Text>
+					</Pressable>
+					<Pressable
+						accessibilityRole="button"
+						onPress={() => {
+							router.push("/publish");
+						}}
+						style={styles.demoButton}
+					>
+						<Text style={styles.demoButtonText}>✏️ 发布编辑器</Text>
+					</Pressable>
+				</View>
 			</ScrollView>
 		</SafeAreaView>
 	);
@@ -117,6 +148,24 @@ function createStyles(colors: ThemeTokens) {
 			gap: 22,
 			padding: 20,
 			paddingBottom: 36,
+		},
+		demoButton: {
+			alignItems: "center",
+			backgroundColor: colors.surface,
+			borderColor: colors.border,
+			borderRadius: 10,
+			borderWidth: StyleSheet.hairlineWidth,
+			minHeight: 48,
+			justifyContent: "center",
+			paddingHorizontal: 16,
+		},
+		demoButtonText: {
+			color: colors.foreground,
+			fontSize: 16,
+			fontWeight: "600",
+		},
+		demoSection: {
+			gap: 10,
 		},
 		error: {
 			color: colors.danger,

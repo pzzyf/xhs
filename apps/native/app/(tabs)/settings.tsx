@@ -1,7 +1,10 @@
+import { router } from "expo-router";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useGuestSession } from "@/features/auth/guest-session-provider";
 import type { ThemePreference, ThemeTokens } from "@/features/theme/tokens";
+import { authClient, clearAuthTokenStorage } from "@/lib/auth-client";
 import { useTheme } from "@/providers/theme-provider";
 
 const themeOptions: Array<{ label: string; value: ThemePreference }> = [
@@ -14,6 +17,23 @@ export default function SettingsScreen() {
 	const { colors, preference, resolvedScheme, setPreference } = useTheme();
 	const styles = createStyles(colors);
 	const resolvedLabel = resolvedScheme === "dark" ? "深色" : "浅色";
+	const { data: session } = authClient.useSession();
+	const { exitGuest } = useGuestSession();
+	const [signingOut, setSigningOut] = useState(false);
+
+	async function signOut() {
+		setSigningOut(true);
+		try {
+			if (session) {
+				await authClient.signOut();
+			}
+			await exitGuest();
+		} finally {
+			await clearAuthTokenStorage();
+			setSigningOut(false);
+			router.replace("/sign-in");
+		}
+	}
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -28,6 +48,7 @@ export default function SettingsScreen() {
 				</Text>
 
 				<View style={styles.section}>
+					<Text style={styles.label}>主题</Text>
 					{themeOptions.map((option) => {
 						const selected = preference === option.value;
 
@@ -50,6 +71,24 @@ export default function SettingsScreen() {
 						);
 					})}
 				</View>
+
+				<View style={styles.footer}>
+					<Pressable
+						accessibilityRole="button"
+						disabled={signingOut}
+						onPress={() => {
+							void signOut();
+						}}
+						style={[
+							styles.logoutButton,
+							signingOut ? styles.logoutButtonDisabled : null,
+						]}
+					>
+						<Text style={styles.logoutButtonText}>
+							{signingOut ? "退出中…" : "退出登录"}
+						</Text>
+					</Pressable>
+				</View>
 			</View>
 		</SafeAreaView>
 	);
@@ -69,6 +108,31 @@ function createStyles(colors: ThemeTokens) {
 		},
 		eyebrow: {
 			color: colors.accent,
+			fontSize: 13,
+			fontWeight: "700",
+			textTransform: "uppercase",
+		},
+		footer: {
+			marginTop: 28,
+		},
+		logoutButton: {
+			alignItems: "center",
+			borderColor: colors.border,
+			borderRadius: 24,
+			borderWidth: StyleSheet.hairlineWidth,
+			minHeight: 50,
+			justifyContent: "center",
+		},
+		logoutButtonDisabled: {
+			opacity: 0.5,
+		},
+		logoutButtonText: {
+			color: colors.danger,
+			fontSize: 16,
+			fontWeight: "700",
+		},
+		label: {
+			color: colors.muted,
 			fontSize: 13,
 			fontWeight: "700",
 			textTransform: "uppercase",

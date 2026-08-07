@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
+import { auth } from "./lib/auth";
 import { rpcHandler } from "./rpc";
 
 export const app = new Hono();
@@ -36,8 +37,15 @@ app.use(
 
 			return undefined;
 		},
-		allowHeaders: ["Authorization", "Content-Type"],
+		allowHeaders: [
+			"Authorization",
+			"Content-Type",
+			"X-Requested-With",
+			"expo-origin",
+			"x-skip-oauth-proxy",
+		],
 		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+		credentials: true,
 		maxAge: 86400,
 	}),
 );
@@ -54,6 +62,8 @@ app.use("/rpc/*", async (c, next) => {
 
 	await next();
 });
+
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.get("/", (c) => {
 	return c.text("Hello Hono!");

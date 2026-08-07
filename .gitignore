@@ -21,6 +21,9 @@ android
 .env*.local
 .env.production
 
+# Local data
+apps/server/data
+
 # IDEs and editors
 .vscode/*
 .idea

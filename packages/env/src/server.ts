@@ -5,6 +5,8 @@ import { z } from "zod";
 
 export const env = createEnv({
 	server: {
+		BETTER_AUTH_SECRET: z.string().min(32),
+		BETTER_AUTH_URL: z.url(),
 		CORS_ORIGIN: z.url().optional(),
 		CORS_ORIGINS: z.string().optional(),
 		NODE_ENV: z
