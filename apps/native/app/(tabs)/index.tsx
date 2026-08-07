@@ -14,11 +14,15 @@ import {
 	homeGreetingQueryKey,
 	homeGreetingQueryOptions,
 } from "@/features/home/queries";
+import type { ThemeTokens } from "@/features/theme/tokens";
 import { apiBaseUrl } from "@/lib/api";
+import { useTheme } from "@/providers/theme-provider";
 
 export default function HomeScreen() {
 	const queryClient = useQueryClient();
 	const greetingQuery = useQuery(homeGreetingQueryOptions);
+	const { colors } = useTheme();
+	const styles = createStyles(colors);
 
 	const errorMessage =
 		greetingQuery.error instanceof Error
@@ -86,90 +90,92 @@ export default function HomeScreen() {
 	);
 }
 
-const styles = StyleSheet.create({
-	body: {
-		color: "#202124",
-		fontSize: 18,
-		lineHeight: 26,
-	},
-	button: {
-		alignItems: "center",
-		backgroundColor: "#202124",
-		borderRadius: 8,
-		minHeight: 48,
-		justifyContent: "center",
-		paddingHorizontal: 18,
-	},
-	buttonPressed: {
-		opacity: 0.68,
-	},
-	buttonText: {
-		color: "#fff",
-		fontSize: 16,
-		fontWeight: "700",
-	},
-	content: {
-		gap: 22,
-		padding: 20,
-		paddingBottom: 36,
-	},
-	error: {
-		color: "#c2362a",
-		fontSize: 16,
-		lineHeight: 24,
-	},
-	eyebrow: {
-		color: "#f25555",
-		fontSize: 13,
-		fontWeight: "700",
-		letterSpacing: 0,
-		textTransform: "uppercase",
-	},
-	header: {
-		gap: 10,
-		paddingTop: 18,
-	},
-	label: {
-		color: "#737373",
-		fontSize: 13,
-		fontWeight: "700",
-		letterSpacing: 0,
-		textTransform: "uppercase",
-	},
-	panel: {
-		backgroundColor: "#fff",
-		borderColor: "#e8e4de",
-		borderRadius: 8,
-		borderWidth: StyleSheet.hairlineWidth,
-		boxShadow: "0 6px 18px rgba(0, 0, 0, 0.06)",
-		gap: 18,
-		padding: 18,
-	},
-	panelHeader: {
-		alignItems: "center",
-		flexDirection: "row",
-		gap: 12,
-		justifyContent: "space-between",
-	},
-	safeArea: {
-		backgroundColor: "#fbfaf8",
-		flex: 1,
-	},
-	subtitle: {
-		color: "#5f6368",
-		fontSize: 16,
-		lineHeight: 24,
-	},
-	title: {
-		color: "#202124",
-		fontSize: 32,
-		fontWeight: "800",
-		letterSpacing: 0,
-		lineHeight: 38,
-	},
-	url: {
-		color: "#202124",
-		fontSize: 15,
-		lineHeight: 22,
-	},
-});
+function createStyles(colors: ThemeTokens) {
+	return StyleSheet.create({
+		body: {
+			color: colors.foreground,
+			fontSize: 18,
+			lineHeight: 26,
+		},
+		button: {
+			alignItems: "center",
+			backgroundColor: colors.foreground,
+			borderRadius: 8,
+			minHeight: 48,
+			justifyContent: "center",
+			paddingHorizontal: 18,
+		},
+		buttonPressed: {
+			opacity: 0.68,
+		},
+		buttonText: {
+			color: colors.background,
+			fontSize: 16,
+			fontWeight: "700",
+		},
+		content: {
+			gap: 22,
+			padding: 20,
+			paddingBottom: 36,
+		},
+		error: {
+			color: colors.danger,
+			fontSize: 16,
+			lineHeight: 24,
+		},
+		eyebrow: {
+			color: colors.accent,
+			fontSize: 13,
+			fontWeight: "700",
+			letterSpacing: 0,
+			textTransform: "uppercase",
+		},
+		header: {
+			gap: 10,
+			paddingTop: 18,
+		},
+		label: {
+			color: colors.muted,
+			fontSize: 13,
+			fontWeight: "700",
+			letterSpacing: 0,
+			textTransform: "uppercase",
+		},
+		panel: {
+			backgroundColor: colors.surface,
+			borderColor: colors.border,
+			borderRadius: 8,
+			borderWidth: StyleSheet.hairlineWidth,
+			boxShadow: "0 6px 18px rgba(0, 0, 0, 0.06)",
+			gap: 18,
+			padding: 18,
+		},
+		panelHeader: {
+			alignItems: "center",
+			flexDirection: "row",
+			gap: 12,
+			justifyContent: "space-between",
+		},
+		safeArea: {
+			backgroundColor: colors.background,
+			flex: 1,
+		},
+		subtitle: {
+			color: colors.muted,
+			fontSize: 16,
+			lineHeight: 24,
+		},
+		title: {
+			color: colors.foreground,
+			fontSize: 32,
+			fontWeight: "800",
+			letterSpacing: 0,
+			lineHeight: 38,
+		},
+		url: {
+			color: colors.foreground,
+			fontSize: 15,
+			lineHeight: 22,
+		},
+	});
+}
