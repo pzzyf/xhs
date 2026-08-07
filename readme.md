@@ -28,6 +28,24 @@ bun run check
 bun run build
 ```
 
+## Cloudflare 管理（Alchemy）
+
+根目录的 [alchemy.run.ts](./alchemy.run.ts) 用 Alchemy（alchemy.run）声明 Cloudflare 资源，与 `apps/server/wrangler.jsonc` 保持一致：
+
+- D1：`xhs-d1`（迁移目录 `apps/server/migrations`）
+- R2：`xhs-images`
+- Worker：`xhs-server`（`nodejs_compat`，本地开发端口 3000）
+
+```bash
+bun run alchemy:dev       # 本地 workerd + 本地 D1/R2 模拟，状态在根目录 .alchemy/
+bun run alchemy:plan      # 预览部署 diff
+bun run alchemy:deploy    # 正式部署
+bun run alchemy:adopt     # 首次接管 wrangler 已创建的资源时用（alchemy deploy --adopt）
+bun run alchemy:destroy   # 销毁栈内资源
+```
+
+环境变量默认从 `apps/server/.env` 读取；首次运行会引导 OAuth 登录 Cloudflare，凭据保存在 `~/.alchemy/profiles.json`。原 wrangler 脚本仍保留在 `apps/server`，但同一批资源不要同时用两套工具部署。
+
 ## 项目结构
 
 ```text

@@ -19,11 +19,21 @@
 		"check-types": "turbo run check-types",
 		"dev:native": "turbo run dev -F native",
 		"dev:server": "turbo run dev -F server",
+		"alchemy": "alchemy",
+		"alchemy:dev": "alchemy dev --env-file apps/server/.env",
+		"alchemy:plan": "alchemy plan --env-file apps/server/.env",
+		"alchemy:deploy": "alchemy deploy --env-file apps/server/.env",
+		"alchemy:adopt": "alchemy deploy --adopt --env-file apps/server/.env",
+		"alchemy:destroy": "alchemy destroy --env-file apps/server/.env",
 		"check": "biome check --write ."
 	},
 	"dependencies": {
+		"@effect/platform-bun": "4.0.0-beta.102",
+		"@effect/platform-node": "4.0.0-beta.102",
 		"@xhs/env": "workspace:*",
+		"alchemy": "^2.0.0-beta.70",
 		"dotenv": "catalog:",
+		"effect": "4.0.0-beta.102",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
