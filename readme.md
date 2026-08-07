@@ -7,11 +7,15 @@
 ```text
 apps/
   native/          Expo Router 客户端（iOS / Android / Expo Web）
-  server/          Hono 服务端（Cloudflare Workers，绑定 D1 / R2）
+  web/             管理后台（预留目录，尚未实现）
+  server/          Hono 服务端（登录、业务接口、图片上传与 AI 接口）
 packages/
-  config/          共享严格 TypeScript 配置
+  api/             共享 oRPC 契约（Zod 输入输出）
+  auth/            better-auth 登录、账号与权限配置
+  db/              Kysely 建连、数据表迁移与演示数据
   env/             Native / Server 类型安全环境变量
-  rpc/             共享 oRPC 契约（Zod 输入输出）
+  infra/           Cloudflare 本地运行与部署配置（wrangler.jsonc / alchemy.run.ts / 环境变量示例）
+  config/          共享严格 TypeScript 配置
 docs/
   specs/           API 契约需求、规格、计划与评审
 .agents/skills/    Codex 专项流程（native-data-fetch）
@@ -33,7 +37,7 @@ bun run dev:server   # wrangler dev --port 3000
 - Android 模拟器：`http://10.0.2.2:3000`
 - 真机：在 `apps/native/.env` 配置可访问的 `EXPO_PUBLIC_SERVER_URL`
 
-环境变量示例见 `apps/native/.env.example`、`apps/server/.env.example` 与 `apps/server/.dev.vars.example`。
+环境变量按目录拆分：`packages/infra/.env`（Cloudflare 凭据与 Alchemy 加密密码）、`apps/server/.env`（服务地址、登录密钥、D1 ID 与可选 Google/邮件/R2）、`apps/native/.env`（用户端服务地址与可选 Google 登录）。示例见对应 `.env.example`。
 
 ## 常用命令
 
@@ -52,13 +56,13 @@ bun run check          # biome check --write .
 ## 服务端
 
 - `/`：健康检查文本
-- `/rpc/*`：oRPC 共享契约（`packages/rpc`），Native 通过 `apps/native/lib/orpc.ts` 调用
-- `/api/auth/*`：better-auth 邮箱密码登录（含 Expo 插件），Kysely + D1 持久化，迁移在 `apps/server/migrations`
+- `/rpc/*`：oRPC 共享契约（`packages/api`），Native 通过 `apps/native/lib/orpc.ts` 调用
+- `/api/auth/*`：better-auth 邮箱密码登录（含 Expo 插件），配置在 `packages/auth`，Kysely + D1 持久化，迁移在 `packages/db/migrations`
 - CORS 默认允许 localhost、loopback 与私网开发来源，可用 `CORS_ORIGIN` / `CORS_ORIGINS` 配置
 
 ## Cloudflare（Alchemy / Wrangler）
 
-根目录 `alchemy.run.ts` 与 `apps/server/wrangler.jsonc` 声明同一批资源：D1 `xhs-d1`、R2 `xhs-images`、Worker `xhs-server`。两套工具任选其一部署，不要混用。
+`packages/infra/alchemy.run.ts` 与 `packages/infra/wrangler.jsonc` 声明同一批资源：D1 `xhs-d1`、R2 `xhs-images`、Worker `xhs-server`。两套工具任选其一部署，不要混用。
 
 ```bash
 bun run alchemy:dev       # 本地 workerd + 本地 D1/R2 模拟
@@ -68,7 +72,7 @@ bun run alchemy:adopt     # 首次接管 wrangler 已创建的资源
 bun run alchemy:destroy   # 销毁栈内资源
 ```
 
-Alchemy 默认从 `apps/server/.env` 读取配置，首次运行会引导 Cloudflare OAuth（凭据在 `~/.alchemy/profiles.json`）；Wrangler 本地开发读取 `apps/server/.dev.vars`。
+Alchemy 通过 `alchemy.run.ts` 内的 dotenv 加载 `packages/infra/.env`（Cloudflare 凭据、`ALCHEMY_PASSWORD`）与 `apps/server/.env`（服务端业务变量），首次运行会引导 Cloudflare OAuth（凭据在 `~/.alchemy/profiles.json`），也可用 `CLOUDFLARE_API_TOKEN`；Wrangler 本地开发通过 `--env-file` 读取 `apps/server/.env`。
 
 ## 认证与会话
 

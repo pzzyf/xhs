@@ -1,7 +1,7 @@
 import { implement } from "@orpc/server";
-import { rpcContract } from "@xhs/rpc";
+import { apiContract } from "@xhs/api";
 
-const os = implement(rpcContract);
+const os = implement(apiContract);
 
 export const ping = os.ping.handler(async () => "pong");
 

@@ -3,24 +3,21 @@
 	"type": "module",
 	"main": "src/index.ts",
 	"scripts": {
-		"dev": "wrangler dev --port 3000",
-		"deploy": "wrangler deploy",
-		"d1:migrate:local": "wrangler d1 migrations apply xhs-d1 --local",
-		"d1:migrate:remote": "wrangler d1 migrations apply xhs-d1 --remote",
+		"dev": "wrangler dev --config ../../packages/infra/wrangler.jsonc --env-file ../../apps/server/.env --port 3000",
+		"deploy": "wrangler deploy --config ../../packages/infra/wrangler.jsonc",
+		"d1:migrate:local": "wrangler d1 migrations apply xhs-d1 --config ../../packages/infra/wrangler.jsonc --local",
+		"d1:migrate:remote": "wrangler d1 migrations apply xhs-d1 --config ../../packages/infra/wrangler.jsonc --remote",
 		"check-types": "tsc -b"
 	},
 	"dependencies": {
-		"@better-auth/expo": "^1.6.26",
-		"@better-auth/kysely-adapter": "^1.6.26",
 		"@hono/node-server": "^2.0.12",
 		"@orpc/server": "^1.14.15",
+		"@xhs/api": "workspace:*",
+		"@xhs/auth": "workspace:*",
+		"@xhs/db": "workspace:*",
 		"@xhs/env": "workspace:*",
-		"@xhs/rpc": "workspace:*",
-		"better-auth": "^1.6.26",
 		"dotenv": "catalog:",
 		"hono": "^4.12.32",
-		"kysely": "^0.29.4",
-		"kysely-d1": "^0.4.0",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

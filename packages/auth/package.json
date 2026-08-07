@@ -1,5 +1,5 @@
 {
-	"name": "@xhs/rpc",
+	"name": "@xhs/auth",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -10,10 +10,13 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@orpc/contract": "^1.14.15",
-		"zod": "catalog:"
+		"@better-auth/expo": "^1.6.26",
+		"@better-auth/kysely-adapter": "^1.6.26",
+		"@xhs/db": "workspace:*",
+		"better-auth": "^1.6.26"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20260804.1",
 		"@xhs/config": "workspace:*",
 		"typescript": "^6.0.3"
 	}

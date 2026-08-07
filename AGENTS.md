@@ -12,13 +12,17 @@
 
 - 仓库是 Bun workspace，由 Turbo 编排；默认从仓库根目录执行 workspace 命令。
 - `apps/native`：Expo 57 + React Native 0.86 客户端，使用 Expo Router、TanStack Query、HeroUI Native、Uniwind、better-auth Expo 客户端。
-- `apps/server`：Hono 服务端；当前 dev/deploy 走 Cloudflare Workers（Wrangler），绑定 D1（`xhs-d1`）与 R2（`xhs-images`）。保留 `src/dev.ts`（Node 本地入口）、`src/index.ts`（AWS Lambda handler）与 tsdown 配置，但已无 build 脚本接线。
+- `apps/web`：管理后台，当前只有占位目录（`package.json` + `README.md`），尚未实现。
+- `apps/server`：Hono 服务端（登录、业务接口、图片上传与 AI 接口）；当前 dev/deploy 走 Cloudflare Workers（Wrangler），绑定 D1（`xhs-d1`）与 R2（`xhs-images`）。保留 `src/dev.ts`（Node 本地入口）、`src/index.ts`（AWS Lambda handler）与 tsdown 配置，但已无 build 脚本接线。
+- `packages/api`：共享 oRPC 契约（`@orpc/contract` + Zod），Native 与 Server 共同消费。
+- `packages/auth`：better-auth 登录、账号与权限配置（`createAuth`）。
+- `packages/db`：D1 + Kysely 建连（`createDb`）、`migrations` 数据表迁移与 `data` 演示数据。
+- `packages/infra`：Cloudflare 本地运行与部署配置（`wrangler.jsonc`、`alchemy.run.ts`、`.env.example`、`.dev.vars.example`）。
 - `packages/env`：基于 `@t3-oss/env-core` 与 Zod 的 Native/Server 环境变量定义。
-- `packages/rpc`：共享 oRPC 契约（`@orpc/contract` + Zod），Native 与 Server 共同消费。
 - `packages/config`：共享的严格 TypeScript 配置。
 - `docs/specs/api-contract`：API 契约需求、规格、计划、评审与工作流状态。
 - `.agents/skills/native-data-fetch`：Expo/React Native 数据请求专项流程。
-- 当前没有独立 `apps/web`；Web 目标由 Expo Web 提供。除非用户明确要求，不新增独立 Web App 或 TanStack Router。
+- Web 目标目前由 Expo Web 提供；除非用户明确要求，不新增独立 Web App 或 TanStack Router。
 
 ## 常用命令
 
@@ -31,11 +35,11 @@ bun run check-types
 bun run check
 ```
 
-- `bun run dev:server` 实际执行 `wrangler dev --port 3000`（`apps/server` 的 dev 脚本）；联调时必须确认实际端口。
+- `bun run dev:server` 实际执行 `wrangler dev --config ../../packages/infra/wrangler.jsonc --port 3000`（`apps/server` 的 dev 脚本）；联调时必须确认实际端口。
 - `bun run check` 会对整个仓库执行 `biome check --write .`，可能改写文件；工作区有无关改动时，优先对本次文件运行 scoped Biome。
 - `bun run build` 当前是空操作：所有 workspace 都没有定义 build 脚本。需要生成 Server 的 Node/Lambda 产物时，在 `apps/server` 执行 `bunx tsdown` 与 `bunx tsdown --config tsdown.lambda.config.ts`。
-- Server 迁移与部署（在 `apps/server` 内）：`bun run d1:migrate:local`、`bun run d1:migrate:remote`、`bun run deploy`（wrangler deploy）。
-- Cloudflare 资源（根目录）：`bun run alchemy:dev|plan|deploy|adopt|destroy`，默认从 `apps/server/.env` 读取配置。
+- Server 迁移与部署（在 `apps/server` 内）：`bun run d1:migrate:local`、`bun run d1:migrate:remote`、`bun run deploy`（wrangler deploy）。迁移文件在 `packages/db/migrations`，Wrangler 配置统一在 `packages/infra/wrangler.jsonc`。
+- Cloudflare 资源（根目录）：`bun run alchemy:dev|plan|deploy|adopt|destroy`，入口为 `packages/infra/alchemy.run.ts`。alchemy.run.ts 通过 dotenv 加载 `packages/infra/.env`（Cloudflare 凭据与 `ALCHEMY_PASSWORD`）与 `apps/server/.env`（服务端业务变量，后者覆盖前者）。
 - Native 专项命令从 `apps/native` 执行：`bunx expo install --check`、`bun run web`。
 - 不手改 `bun.lock`；依赖变化必须通过 Bun/Expo 命令产生并一并检查。
 
@@ -87,11 +91,11 @@ bun run check
 
 - `apps/server/src/app.ts` 定义可复用的 Hono app：logger、CORS、`/rpc/*`（oRPC RPCHandler）、`/api/auth/*`（better-auth + Kysely/D1）、`GET /`。
 - `dev.ts` 是 Node 本地入口（`PORT` 未设置时从 3000 向后找空闲端口），`index.ts` 暴露 AWS Lambda handler，`worker.ts` 是 Wrangler/Alchemy 使用的 Cloudflare Worker 入口。
-- 当前 dev/deploy 脚本使用 Wrangler（`apps/server/package.json`），绑定 D1 `xhs-d1` 与 R2 `xhs-images`；迁移在 `apps/server/migrations`，用 `wrangler d1 migrations apply` 执行。`alchemy.run.ts` 声明同一批资源；改资源或绑定时要保持两套声明一致，不要混用部署工具。
+- 当前 dev/deploy 脚本使用 Wrangler（`apps/server/package.json`），绑定 D1 `xhs-d1` 与 R2 `xhs-images`；迁移在 `packages/db/migrations`，用 `wrangler d1 migrations apply` 执行。`packages/infra/alchemy.run.ts` 声明同一批资源；改资源或绑定时要保持两套声明一致，不要混用部署工具。
 - 构建：`tsdown.config.ts`（Node `dev.mjs`）与 `tsdown.lambda.config.ts`（Lambda `index.mjs`）都保持无代码拆分、自包含产物约束；项目当前没有把它们接进 package scripts，需要时在 `apps/server` 手动执行 `bunx tsdown`。
 - CORS 默认允许 localhost、loopback 和私网开发来源，并可由 `CORS_ORIGIN`/`CORS_ORIGINS` 配置；不要为解决局部跨域问题无条件放开生产来源。
-- 新增服务端环境变量时更新 `packages/env/src/server.ts` 与 `apps/server/.env.example`（Wrangler 本地变量同时更新 `.dev.vars.example`）；Native 与 Server 都应从 `@xhs/env` 对应入口读取环境变量。
-- 共享 TypeScript 规则只放 `packages/config`；两个及以上 workspace 真正复用的运行时代码才抽到共享包（当前共享契约在 `packages/rpc`）。
+- 新增服务端环境变量时更新 `packages/env/src/server.ts` 与 `apps/server/.env.example`（Wrangler 本地 dev 通过 `--env-file ../../apps/server/.env` 读取，路径相对配置文件目录）；Native 与 Server 都应从 `@xhs/env` 对应入口读取环境变量。`packages/infra/.env` 只放 Cloudflare 凭据与 `ALCHEMY_PASSWORD`。
+- 共享 TypeScript 规则只放 `packages/config`；两个及以上 workspace 真正复用的运行时代码才抽到共享包（当前共享契约在 `packages/api`，登录配置在 `packages/auth`，数据库在 `packages/db`）。
 - 已有技术选型：D1 + Kysely、better-auth、oRPC。新能力沿用这些模式，不要另起数据库、ORM、认证或 API 层。
 
 ## 验证标准

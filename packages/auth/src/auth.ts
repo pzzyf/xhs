@@ -1,13 +1,16 @@
 import { expo } from "@better-auth/expo";
 import { kyselyAdapter } from "@better-auth/kysely-adapter";
 import type { D1Database } from "@cloudflare/workers-types";
+import { createDb } from "@xhs/db";
 import { betterAuth } from "better-auth";
-import { Kysely } from "kysely";
-import { D1Dialect } from "kysely-d1";
 
-import type { ServerEnv } from "../types";
+export type AuthEnv = {
+	BETTER_AUTH_SECRET?: string;
+	BETTER_AUTH_URL?: string;
+	NODE_ENV?: string;
+};
 
-export function createAuth(db: D1Database, env: ServerEnv) {
+export function createAuth(db: D1Database, env: AuthEnv) {
 	const secret = env.BETTER_AUTH_SECRET;
 
 	if (!secret || secret.length < 32) {
@@ -18,13 +21,7 @@ export function createAuth(db: D1Database, env: ServerEnv) {
 
 	return betterAuth({
 		baseURL: env.BETTER_AUTH_URL ?? "http://localhost:3000",
-		database: kyselyAdapter(
-			new Kysely({
-				dialect: new D1Dialect({
-					database: db,
-				}),
-			}),
-		),
+		database: kyselyAdapter(createDb(db)),
 		emailAndPassword: {
 			enabled: true,
 			minPasswordLength: 6,

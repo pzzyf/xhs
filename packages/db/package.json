@@ -1,0 +1,21 @@
+{
+	"name": "@xhs/db",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"check-types": "tsc --noEmit"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"kysely": "^0.29.4",
+		"kysely-d1": "^0.4.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20260804.1",
+		"@xhs/config": "workspace:*",
+		"typescript": "^6.0.3"
+	}
+}

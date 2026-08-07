@@ -11,7 +11,7 @@ export const greetingContract = oc
 	)
 	.output(z.string());
 
-export const rpcContract = {
+export const apiContract = {
 	greeting: greetingContract,
 	ping: pingContract,
 };

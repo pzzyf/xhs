@@ -1,0 +1,12 @@
+{
+	"name": "@xhs/infra",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@effect/platform-bun": "4.0.0-beta.102",
+		"alchemy": "^2.0.0-beta.70",
+		"dotenv": "catalog:",
+		"effect": "4.0.0-beta.102"
+	}
+}

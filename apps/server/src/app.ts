@@ -1,8 +1,8 @@
+import { createAuth } from "@xhs/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
-import { createAuth } from "./lib/auth";
 import { rpcHandler } from "./rpc";
 import type { ServerEnv } from "./types";
 

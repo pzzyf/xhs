@@ -24,7 +24,7 @@ android
 .dev.vars*.local
 
 # Local data
-apps/server/data
+packages/db/data
 
 # Cloudflare
 .wrangler
