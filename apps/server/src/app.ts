@@ -3,6 +3,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
+import { rpcHandler } from "./rpc";
+
 export const app = new Hono();
 
 const configuredOrigins = (env.CORS_ORIGINS ?? env.CORS_ORIGIN ?? "")
@@ -39,6 +41,19 @@ app.use(
 		maxAge: 86400,
 	}),
 );
+
+app.use("/rpc/*", async (c, next) => {
+	const { matched, response } = await rpcHandler.handle(c.req.raw, {
+		prefix: "/rpc",
+		context: {},
+	});
+
+	if (matched) {
+		return c.newResponse(response.body, response);
+	}
+
+	await next();
+});
 
 app.get("/", (c) => {
 	return c.text("Hello Hono!");

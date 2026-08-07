@@ -14,7 +14,9 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.12",
+		"@orpc/server": "^1.14.15",
 		"@xhs/env": "workspace:*",
+		"@xhs/rpc": "workspace:*",
 		"dotenv": "catalog:",
 		"hono": "^4.12.32",
 		"zod": "catalog:"

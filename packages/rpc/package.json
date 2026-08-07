@@ -1,0 +1,20 @@
+{
+	"name": "@xhs/rpc",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"check-types": "tsc --noEmit"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@orpc/contract": "^1.14.15",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@xhs/config": "workspace:*",
+		"typescript": "^6.0.3"
+	}
+}

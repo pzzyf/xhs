@@ -10,15 +10,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getHomeGreeting, homeGreetingQueryKey } from "@/features/home/queries";
+import {
+	homeGreetingQueryKey,
+	homeGreetingQueryOptions,
+} from "@/features/home/queries";
 import { apiBaseUrl } from "@/lib/api";
 
 export default function HomeScreen() {
 	const queryClient = useQueryClient();
-	const greetingQuery = useQuery({
-		queryKey: homeGreetingQueryKey,
-		queryFn: getHomeGreeting,
-	});
+	const greetingQuery = useQuery(homeGreetingQueryOptions);
 
 	const errorMessage =
 		greetingQuery.error instanceof Error
