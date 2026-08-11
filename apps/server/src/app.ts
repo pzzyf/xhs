@@ -1,9 +1,7 @@
-import { createAuth } from "@xhs/auth";
+import { parseServerEnv } from "@xhs/env";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-
-import { rpcHandler } from "./rpc";
 import type { ServerEnv } from "./types";
 
 const localOriginPattern =
@@ -18,17 +16,14 @@ app.use(
 	"*",
 	cors({
 		origin: (origin, c) => {
-			const configuredOrigins = (c.env.CORS_ORIGINS ?? c.env.CORS_ORIGIN ?? "")
-				.split(",")
+			const parsed = parseServerEnv(c.env);
+			const configuredOrigins = parsed.CORS_ORIGINS.split(",")
 				.map((item: string) => item.trim())
 				.filter(Boolean);
-
-			if (configuredOrigins.includes("*")) {
-				return "*";
-			}
+			const allowed = [...configuredOrigins, parsed.CORS_ORIGIN];
 
 			if (
-				configuredOrigins.includes(origin) ||
+				allowed.includes(origin) ||
 				localOriginPattern.test(origin) ||
 				privateNetworkOriginPattern.test(origin)
 			) {
@@ -37,36 +32,17 @@ app.use(
 
 			return undefined;
 		},
-		allowHeaders: [
-			"Authorization",
-			"Content-Type",
-			"X-Requested-With",
-			"expo-origin",
-			"x-skip-oauth-proxy",
-		],
+		allowHeaders: ["Authorization", "Content-Type"],
 		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		credentials: true,
 		maxAge: 86400,
 	}),
 );
 
-app.use("/rpc/*", async (c, next) => {
-	const { matched, response } = await rpcHandler.handle(c.req.raw, {
-		prefix: "/rpc",
-		context: {},
-	});
-
-	if (matched) {
-		return c.newResponse(response.body, response);
-	}
-
-	await next();
-});
-
-app.on(["POST", "GET"], "/api/auth/*", (c) =>
-	createAuth(c.env.DB, c.env).handler(c.req.raw),
+app.get("/", (c) =>
+	c.json({
+		ok: true,
+		name: "xhs-server",
+		time: new Date().toISOString(),
+	}),
 );
-
-app.get("/", (c) => {
-	return c.text("Hello Hono!");
-});

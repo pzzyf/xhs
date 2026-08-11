@@ -4,18 +4,20 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"check-types": "tsc --noEmit"
+		"check-types": "tsc --noEmit",
+		"db:generate": "drizzle-kit generate"
 	},
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./schema": "./src/schema.ts"
 	},
 	"dependencies": {
-		"kysely": "^0.29.4",
-		"kysely-d1": "^0.4.0"
+		"drizzle-orm": "^0.44.4"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^5.20260804.1",
 		"@xhs/config": "workspace:*",
+		"drizzle-kit": "^0.31.4",
 		"typescript": "^6.0.3"
 	}
 }

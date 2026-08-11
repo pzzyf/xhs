@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import { Config } from "effect";
 import * as Effect from "effect/Effect";
 
-// 按官方 Better-T-Stack 布局加载环境变量（后者覆盖前者）：
+// 按 Better-T-Stack 布局加载环境变量（后者覆盖前者）：
 // packages/infra/.env 只放 Cloudflare 凭据与 ALCHEMY_PASSWORD，
 // apps/server/.env 放服务端业务变量（BETTER_AUTH_SECRET 等）。
 const infraDir = import.meta.dir;
@@ -26,7 +26,7 @@ export const Worker = Cloudflare.Worker("xhs-server", {
 	name: "xhs-server",
 	main: "../../apps/server/src/worker.ts",
 	compatibility: {
-		// 本地 workerd 二进制支持的兼容日期上限为 2026-07-11，需保持在此日期以下
+		// 本地 workerd 二进制支持的兼容日期上限，需保持在此日期以下
 		date: "2026-07-11",
 		flags: ["nodejs_compat"],
 	},
@@ -42,7 +42,7 @@ export const Worker = Cloudflare.Worker("xhs-server", {
 			Config.withDefault("http://localhost:8081"),
 		),
 		CORS_ORIGINS: Config.string("CORS_ORIGINS").pipe(Config.withDefault("")),
-		NODE_ENV: Config.string("NODE_ENV").pipe(Config.withDefault("development")),
+		SEED_SECRET: Config.string("SEED_SECRET").pipe(Config.withDefault("")),
 		DB,
 		IMAGES,
 	},

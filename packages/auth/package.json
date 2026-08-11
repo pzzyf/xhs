@@ -10,13 +10,9 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@better-auth/expo": "^1.6.26",
-		"@better-auth/kysely-adapter": "^1.6.26",
-		"@xhs/db": "workspace:*",
-		"better-auth": "^1.6.26"
+		"better-auth": "1.6.26"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^5.20260804.1",
 		"@xhs/config": "workspace:*",
 		"typescript": "^6.0.3"
 	}

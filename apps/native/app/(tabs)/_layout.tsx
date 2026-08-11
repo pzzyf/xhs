@@ -53,9 +53,9 @@ export default function TabsLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="settings"
+				name="me"
 				options={{
-					title: "设置",
+					title: "我的",
 				}}
 			/>
 		</Tabs>

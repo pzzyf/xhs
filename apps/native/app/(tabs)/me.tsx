@@ -2,13 +2,12 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { useTheme } from "@/providers/theme-provider";
 
-export default function HomeScreen() {
+export default function MeScreen() {
 	const { colors } = useTheme();
 
 	return (
 		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<Text style={[styles.title, { color: colors.foreground }]}>首页</Text>
-			<Text style={{ color: colors.muted }}>内容加载中…</Text>
+			<Text style={[styles.title, { color: colors.foreground }]}>我的</Text>
 		</View>
 	);
 }
@@ -18,7 +17,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 8,
 	},
 	title: {
 		fontSize: 24,

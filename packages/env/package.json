@@ -7,16 +7,14 @@
 		"check-types": "tsc --noEmit"
 	},
 	"exports": {
-		"./server": "./src/server.ts",
-		"./native": "./src/native.ts"
+		".": "./src/index.ts",
+		"./native": "./src/native.ts",
+		"./server": "./src/server.ts"
 	},
 	"dependencies": {
-		"@t3-oss/env-core": "^0.13.11",
-		"dotenv": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@types/node": "catalog:",
 		"@xhs/config": "workspace:*",
 		"typescript": "^6.0.3"
 	}

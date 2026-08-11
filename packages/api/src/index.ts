@@ -1,1 +1,1 @@
-export { apiContract, greetingContract, pingContract } from "./contract";
+export * from "./contract";
