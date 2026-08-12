@@ -30,4 +30,19 @@ export const rpcRouter = builder.router({
 			return context.notes.create(input, context.viewerUserId);
 		}),
 	},
+	likes: {
+		toggle: builder.likes.toggle.handler(async ({ input, context }) => {
+			if (!context.viewerUserId) {
+				throw new ORPCError("UNAUTHORIZED", { message: "请先登录" });
+			}
+			const result = await context.notes.toggleLike(
+				input.noteId,
+				context.viewerUserId,
+			);
+			if (!result) {
+				throw new ORPCError("NOT_FOUND", { message: "笔记不存在" });
+			}
+			return result;
+		}),
+	},
 });

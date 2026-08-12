@@ -43,6 +43,7 @@ describe("rpc router", () => {
 			}),
 			get: async () => null,
 			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
 		} satisfies NotesService;
 
 		const output = await call(
@@ -60,6 +61,7 @@ describe("rpc router", () => {
 			list: async () => listResult,
 			get: async () => null,
 			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
 		} satisfies NotesService;
 
 		await expect(
@@ -80,6 +82,7 @@ describe("rpc router", () => {
 				viewerHasLiked: viewerUserId === "viewer-1",
 			}),
 			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
 		} satisfies NotesService;
 
 		const output = await call(
@@ -101,6 +104,7 @@ describe("rpc router", () => {
 				receivedAuthorId = authorId;
 				return { ...detailResult, title: input.title };
 			},
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
 		} satisfies NotesService;
 
 		const output = await call(
@@ -123,6 +127,7 @@ describe("rpc router", () => {
 			list: async () => listResult,
 			get: async () => null,
 			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
 		} satisfies NotesService;
 
 		await expect(
@@ -137,5 +142,62 @@ describe("rpc router", () => {
 				{ context: { notes, viewerUserId: null } },
 			),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	test("forwards like toggle to the notes service for an authenticated viewer", async () => {
+		const received = { noteId: "", userId: "" };
+		const notes = {
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async (noteId, userId) => {
+				received.noteId = noteId;
+				received.userId = userId;
+				return { liked: true, likeCount: 3 };
+			},
+		} satisfies NotesService;
+
+		const output = await call(
+			rpcRouter.likes.toggle,
+			{ noteId: "16" },
+			{ context: { notes, viewerUserId: "viewer-1" } },
+		);
+
+		expect(output).toEqual({ liked: true, likeCount: 3 });
+		expect(received).toEqual({ noteId: "16", userId: "viewer-1" });
+	});
+
+	test("rejects like toggle without a viewer session", async () => {
+		const notes = {
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+		} satisfies NotesService;
+
+		await expect(
+			call(
+				rpcRouter.likes.toggle,
+				{ noteId: "16" },
+				{ context: { notes, viewerUserId: null } },
+			),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	test("maps a missing note to NOT_FOUND when toggling", async () => {
+		const notes = {
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => null,
+		} satisfies NotesService;
+
+		await expect(
+			call(
+				rpcRouter.likes.toggle,
+				{ noteId: "999" },
+				{ context: { notes, viewerUserId: "viewer-1" } },
+			),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 });

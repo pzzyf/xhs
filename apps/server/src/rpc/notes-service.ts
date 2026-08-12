@@ -1,4 +1,4 @@
-import type { NoteDetail, NotesListOutput } from "@xhs/api";
+import type { LikesToggleOutput, NoteDetail, NotesListOutput } from "@xhs/api";
 import { type Database, likes, notes, user } from "@xhs/db";
 import { and, count, desc, eq, lt } from "drizzle-orm";
 
@@ -20,6 +20,7 @@ export interface NotesService {
 	list(input: NotesListInput): Promise<NotesListOutput>;
 	get(id: string, viewerUserId: string | null): Promise<NoteDetail | null>;
 	create(input: NotesCreateInput, authorId: string): Promise<NoteDetail>;
+	toggleLike(noteId: string, userId: string): Promise<LikesToggleOutput | null>;
 }
 
 export function createNotesService(db: Database, origin: string): NotesService {
@@ -125,6 +126,46 @@ export function createNotesService(db: Database, origin: string): NotesService {
 				throw new Error("发布后读取笔记失败");
 			}
 			return note;
+		},
+
+		async toggleLike(noteId, userId) {
+			const noteIdNumber = Number(noteId);
+			const [existingNote] = await db
+				.select({ id: notes.id })
+				.from(notes)
+				.where(eq(notes.id, noteIdNumber))
+				.limit(1);
+			if (!existingNote) {
+				return null;
+			}
+
+			const [existingLike] = await db
+				.select({ noteId: likes.noteId })
+				.from(likes)
+				.where(and(eq(likes.noteId, noteIdNumber), eq(likes.userId, userId)))
+				.limit(1);
+
+			if (existingLike) {
+				await db
+					.delete(likes)
+					.where(and(eq(likes.noteId, noteIdNumber), eq(likes.userId, userId)));
+			} else {
+				await db.insert(likes).values({
+					noteId: noteIdNumber,
+					userId,
+					createdAt: Date.now(),
+				});
+			}
+
+			const [countRow] = await db
+				.select({ value: count() })
+				.from(likes)
+				.where(eq(likes.noteId, noteIdNumber));
+
+			return {
+				liked: !existingLike,
+				likeCount: countRow?.value ?? 0,
+			};
 		},
 	};
 

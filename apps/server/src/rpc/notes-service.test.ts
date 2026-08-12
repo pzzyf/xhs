@@ -14,7 +14,7 @@ type FakeNote = {
 	imageKey: string;
 	createdAt: number;
 };
-type FakeLike = { noteId: number; userId: string };
+type FakeLike = { noteId: number; userId: string; createdAt?: number };
 
 class FakeD1 {
 	constructor(
@@ -43,6 +43,37 @@ class FakeD1 {
 				createdAt: Number(createdAt),
 			});
 			return [[nextId]];
+		}
+
+		if (sql.includes('insert into "likes"')) {
+			const [noteId, userId, createdAt] = params;
+			this.likes.push({
+				noteId: Number(noteId),
+				userId: String(userId),
+				createdAt: Number(createdAt),
+			});
+			return [];
+		}
+
+		if (sql.includes('delete from "likes"')) {
+			const [noteId, userId] = params;
+			const index = this.likes.findIndex(
+				(like) =>
+					like.noteId === Number(noteId) && like.userId === String(userId),
+			);
+			if (index >= 0) {
+				this.likes.splice(index, 1);
+			}
+			return [];
+		}
+
+		if (
+			sql.includes('from "notes"') &&
+			!sql.includes("inner join") &&
+			sql.includes("where")
+		) {
+			const noteId = Number(params[0]);
+			return this.notes.some((note) => note.id === noteId) ? [[noteId]] : [];
 		}
 
 		if (sql.includes('from "notes" inner join "user"')) {
@@ -127,6 +158,11 @@ class FakeD1Statement {
 
 	async raw() {
 		return this.execute(this.sql, this.params);
+	}
+
+	async run() {
+		await this.execute(this.sql, this.params);
+		return { success: true };
 	}
 }
 
@@ -266,6 +302,38 @@ describe("notes service", () => {
 
 		const listed = await service.list({ limit: 1 });
 		expect(listed.items[0]?.id).toBe("12");
+	});
+
+	test("toggles a like off for an existing viewer like", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		const output = await service.toggleLike("10", "viewer-1");
+
+		expect(output).toEqual({ liked: false, likeCount: 1 });
+	});
+
+	test("toggles a like on and is idempotent per user", async () => {
+		const isolatedDb = createDb(
+			new FakeD1(users, notes, [
+				{ noteId: 10, userId: "reader-2" },
+			]) as unknown as D1Database,
+		);
+		const service = createNotesService(isolatedDb, "https://api.example.com");
+
+		const first = await service.toggleLike("10", "viewer-1");
+		expect(first).toEqual({ liked: true, likeCount: 2 });
+
+		const second = await service.toggleLike("10", "viewer-1");
+		expect(second).toEqual({ liked: false, likeCount: 1 });
+
+		const again = await service.toggleLike("10", "viewer-1");
+		expect(again).toEqual({ liked: true, likeCount: 2 });
+	});
+
+	test("returns null when toggling a missing note", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		expect(await service.toggleLike("999", "viewer-1")).toBeNull();
 	});
 
 	test("rejects malformed stored tags", async () => {
