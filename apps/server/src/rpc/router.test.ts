@@ -31,6 +31,24 @@ const detailResult = {
 	authorId: "author-1",
 };
 
+function firstListItem() {
+	const item = listResult.items[0];
+	if (!item) {
+		throw new Error("listResult is empty");
+	}
+	return item;
+}
+
+const mineStubs = {
+	listMine: async () => [firstListItem()],
+	getProfile: async () => ({
+		id: "author-1",
+		name: "体验官小艾",
+		email: "demo@xhs.dev",
+		image: null,
+	}),
+};
+
 describe("rpc router", () => {
 	test("returns the list selected by the validated input", async () => {
 		const notes = {
@@ -44,6 +62,7 @@ describe("rpc router", () => {
 			get: async () => null,
 			create: async () => detailResult,
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -62,6 +81,7 @@ describe("rpc router", () => {
 			get: async () => null,
 			create: async () => detailResult,
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		await expect(
@@ -83,6 +103,7 @@ describe("rpc router", () => {
 			}),
 			create: async () => detailResult,
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -105,6 +126,7 @@ describe("rpc router", () => {
 				return { ...detailResult, title: input.title };
 			},
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -128,6 +150,7 @@ describe("rpc router", () => {
 			get: async () => null,
 			create: async () => detailResult,
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		await expect(
@@ -155,6 +178,7 @@ describe("rpc router", () => {
 				received.userId = userId;
 				return { liked: true, likeCount: 3 };
 			},
+			...mineStubs,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -173,6 +197,7 @@ describe("rpc router", () => {
 			get: async () => null,
 			create: async () => detailResult,
 			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			...mineStubs,
 		} satisfies NotesService;
 
 		await expect(
@@ -190,6 +215,7 @@ describe("rpc router", () => {
 			get: async () => null,
 			create: async () => detailResult,
 			toggleLike: async () => null,
+			...mineStubs,
 		} satisfies NotesService;
 
 		await expect(
@@ -199,5 +225,77 @@ describe("rpc router", () => {
 				{ context: { notes, viewerUserId: "viewer-1" } },
 			),
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	test("returns the current user's notes", async () => {
+		const notes = {
+			...mineStubs,
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+			listMine: async (userId) => [
+				{ ...firstListItem(), title: `${userId} 的笔记` },
+			],
+		} satisfies NotesService;
+
+		const output = await call(rpcRouter.me.notes, undefined, {
+			context: { notes, viewerUserId: "author-1" },
+		});
+
+		expect(output[0]?.title).toBe("author-1 的笔记");
+	});
+
+	test("rejects me.notes without a viewer session", async () => {
+		const notes = {
+			...mineStubs,
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+		} satisfies NotesService;
+
+		await expect(
+			call(rpcRouter.me.notes, undefined, {
+				context: { notes, viewerUserId: null },
+			}),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	test("returns the current user profile", async () => {
+		const notes = {
+			...mineStubs,
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+		} satisfies NotesService;
+
+		const output = await call(rpcRouter.me.profile, undefined, {
+			context: { notes, viewerUserId: "author-1" },
+		});
+
+		expect(output).toEqual({
+			id: "author-1",
+			name: "体验官小艾",
+			email: "demo@xhs.dev",
+			image: null,
+		});
+	});
+
+	test("rejects me.profile without a viewer session", async () => {
+		const notes = {
+			...mineStubs,
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+			toggleLike: async () => ({ liked: true, likeCount: 1 }),
+		} satisfies NotesService;
+
+		await expect(
+			call(rpcRouter.me.profile, undefined, {
+				context: { notes, viewerUserId: null },
+			}),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 	});
 });

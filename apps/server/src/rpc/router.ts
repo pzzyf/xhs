@@ -45,4 +45,22 @@ export const rpcRouter = builder.router({
 			return result;
 		}),
 	},
+	me: {
+		notes: builder.me.notes.handler(async ({ context }) => {
+			if (!context.viewerUserId) {
+				throw new ORPCError("UNAUTHORIZED", { message: "请先登录" });
+			}
+			return context.notes.listMine(context.viewerUserId);
+		}),
+		profile: builder.me.profile.handler(async ({ context }) => {
+			if (!context.viewerUserId) {
+				throw new ORPCError("UNAUTHORIZED", { message: "请先登录" });
+			}
+			const profile = await context.notes.getProfile(context.viewerUserId);
+			if (!profile) {
+				throw new ORPCError("NOT_FOUND", { message: "用户不存在" });
+			}
+			return profile;
+		}),
+	},
 });

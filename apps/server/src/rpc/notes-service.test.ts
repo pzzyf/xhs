@@ -30,6 +30,38 @@ class FakeD1 {
 	}
 
 	private execute(sql: string, params: unknown[]): unknown[][] {
+		if (sql.includes('from "user"') && sql.includes("where")) {
+			const userId = String(params[0]);
+			const row = this.users.find((userRow) => userRow.id === userId);
+			return row ? [[row.id, row.name, "demo@xhs.dev", null]] : [];
+		}
+
+		if (
+			sql.includes('from "notes" inner join "user"') &&
+			sql.includes('"notes"."authorId" = ?')
+		) {
+			const authorId = String(params[0]);
+			return this.notes
+				.filter((note) => note.authorId === authorId)
+				.sort((left, right) => right.id - left.id)
+				.flatMap((note) => {
+					const author = this.users.find(
+						(userRow) => userRow.id === note.authorId,
+					);
+					return author
+						? [
+								[
+									note.id,
+									note.title,
+									note.imageKey,
+									author.name,
+									note.createdAt,
+								],
+							]
+						: [];
+				});
+		}
+
 		if (sql.includes('insert into "notes"')) {
 			const [authorId, title, body, tags, imageKey, createdAt] = params;
 			const nextId = Math.max(0, ...this.notes.map((note) => note.id)) + 1;
@@ -201,6 +233,8 @@ const notes: FakeNote[] = [
 	},
 ];
 
+const initialNotes = structuredClone(notes);
+
 const fakeDb = createDb(
 	new FakeD1(users, notes, [
 		{ noteId: 10, userId: "viewer-1" },
@@ -334,6 +368,49 @@ describe("notes service", () => {
 		const service = createNotesService(fakeDb, "https://api.example.com");
 
 		expect(await service.toggleLike("999", "viewer-1")).toBeNull();
+	});
+
+	test("lists only the current user's notes in descending order", async () => {
+		const isolatedDb = createDb(
+			new FakeD1(
+				users,
+				structuredClone(initialNotes),
+				[],
+			) as unknown as D1Database,
+		);
+		const service = createNotesService(isolatedDb, "https://api.example.com");
+
+		const output = await service.listMine("author-1");
+
+		expect(output.map(({ id, title }) => ({ id, title }))).toEqual([
+			{ id: "11", title: "第十一篇" },
+			{ id: "10", title: "第十篇" },
+			{ id: "2", title: "第二篇" },
+		]);
+		expect(output.every((note) => note.authorName === "体验官小艾")).toBeTrue();
+	});
+
+	test("returns an empty list for a user without notes", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		expect(await service.listMine("viewer-1")).toEqual([]);
+	});
+
+	test("returns the current user profile", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		expect(await service.getProfile("author-1")).toEqual({
+			id: "author-1",
+			name: "体验官小艾",
+			email: "demo@xhs.dev",
+			image: null,
+		});
+	});
+
+	test("returns null for a missing profile", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		expect(await service.getProfile("missing-user")).toBeNull();
 	});
 
 	test("rejects malformed stored tags", async () => {

@@ -1,4 +1,10 @@
-import type { LikesToggleOutput, NoteDetail, NotesListOutput } from "@xhs/api";
+import type {
+	LikesToggleOutput,
+	MeProfile,
+	NoteDetail,
+	NoteListItem,
+	NotesListOutput,
+} from "@xhs/api";
 import { type Database, likes, notes, user } from "@xhs/db";
 import { and, count, desc, eq, lt } from "drizzle-orm";
 
@@ -21,6 +27,8 @@ export interface NotesService {
 	get(id: string, viewerUserId: string | null): Promise<NoteDetail | null>;
 	create(input: NotesCreateInput, authorId: string): Promise<NoteDetail>;
 	toggleLike(noteId: string, userId: string): Promise<LikesToggleOutput | null>;
+	listMine(userId: string): Promise<NoteListItem[]>;
+	getProfile(userId: string): Promise<MeProfile | null>;
 }
 
 export function createNotesService(db: Database, origin: string): NotesService {
@@ -166,6 +174,51 @@ export function createNotesService(db: Database, origin: string): NotesService {
 				liked: !existingLike,
 				likeCount: countRow?.value ?? 0,
 			};
+		},
+
+		async listMine(userId) {
+			const rows = await db
+				.select({
+					id: notes.id,
+					title: notes.title,
+					imageKey: notes.imageKey,
+					authorName: user.name,
+					createdAt: notes.createdAt,
+				})
+				.from(notes)
+				.innerJoin(user, eq(notes.authorId, user.id))
+				.where(eq(notes.authorId, userId))
+				.orderBy(desc(notes.id));
+
+			return rows.map((row) => ({
+				id: String(row.id),
+				title: row.title,
+				coverUrl: buildImageUrl(origin, row.imageKey),
+				authorName: row.authorName,
+				createdAt: new Date(row.createdAt).toISOString(),
+			}));
+		},
+
+		async getProfile(userId) {
+			const [row] = await db
+				.select({
+					id: user.id,
+					name: user.name,
+					email: user.email,
+					image: user.image,
+				})
+				.from(user)
+				.where(eq(user.id, userId))
+				.limit(1);
+
+			return row
+				? {
+						id: row.id,
+						name: row.name,
+						email: row.email,
+						image: row.image ?? null,
+					}
+				: null;
 		},
 	};
 
