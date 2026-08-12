@@ -4,10 +4,30 @@
 
 ## 当前状态
 
-- **阶段**：P1（Alchemy 资源 + Drizzle Schema/Migrate/Seed）—— **awaiting-human-review**
-- **总体状态**：数据层就绪（迁移已应用、种子 16 条已验证；待用户批准进入 P2）
+- **阶段**：P2（better-auth 注册登录登出 + Native 会话）—— **awaiting-human-review**
+- **总体状态**：鉴权主链路已实现并通过 Web/HTTP 验证；待用户批准进入 P3
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P2 收尾（2026-08-12）
+
+已完成：
+
+- `packages/auth`：better-auth 1.6.26 + Drizzle/D1 adapter + Expo 服务端插件，basePath `/api/auth`
+- `apps/server/src/app.ts`：挂载 `GET/POST /api/auth/*`，补齐 Expo cookie 所需 CORS headers
+- HTTP 冒烟：注册、get-session、退出、重新登录均返回 200；会话清除/恢复正确
+- Native auth client：`@better-auth/expo/client` + SecureStore；scheme/storagePrefix 均为 `xhs`
+- Native 会话：AuthProvider 暴露 user/session/refresh/signOut；根 Provider 顺序符合规格
+- 登录/注册页：邮箱+密码、注册昵称、中文校验/错误态；成功固定回首页
+- 首页/我的：未登录可浏览首页；发布与我的登录入口；已登录展示昵称/邮箱并可退出
+- Android 模拟器默认 API 地址 `10.0.2.2:3000`；显式 `EXPO_PUBLIC_SERVER_URL` 优先
+- Web 全流程：未登录首页 → 注册 → 我的 → 刷新保持登录 → 退出 → 再登录，浏览器控制台 0 error
+- 验证：Bun 单元测试 6/6；`expo install --check` 通过；全仓类型与 scoped Biome 通过
+
+环境事实：
+
+- Web 验收因本机 8081 已占用，Expo worktree 临时使用 8082，并通过进程级 `CORS_ORIGINS` 显式放行；未扩大生产 trusted origins
+- 独立 worktree 的 Alchemy 状态复用迁移记录但本地 SQLite 为空，验收时仅对 worktree D1 手动应用现有 `0000` 迁移；未修改主工作区数据
 
 ## P1 收尾（2026-08-12）
 
@@ -56,8 +76,8 @@
 | 阶段 | 状态 | 日期 | 验收方式 | 结果 |
 |------|------|------|----------|------|
 | P0 | 完成（v0.1.0） | 2026-08-12 | `check-types` + Biome + `GET /` 健康检查 | 通过 |
-| P1 | awaiting-human-review | 2026-08-12 | alchemy dev 迁移 + 种子 + D1 直查 | 通过 |
-| P2 | pending | — | 注册/登录/登出全流程 | — |
+| P1 | 完成（v0.2.0） | 2026-08-12 | alchemy dev 迁移 + 种子 + D1 直查 | 通过 |
+| P2 | awaiting-human-review | 2026-08-12 | HTTP + Web 注册/登录/会话保持/登出 | 通过 |
 | P3 | pending | — | 双列流 + 详情连真实 D1 | — |
 | P4 | pending | — | 发布后列表可见（R2 图） | — |
 | P5 | pending | — | 点赞 toggle 幂等 + 登录拦截 | — |
@@ -66,8 +86,8 @@
 
 ## 待办（当前步骤）
 
-1. **用户审查并批准 P1**（schema/迁移/种子 + 验证输出）。
-2. 用户批准后进入 P2（better-auth 注册/登录/登出）。
+1. **用户审查并批准 P2**（better-auth、Native 会话、登录/注册/退出与验证输出）。
+2. 用户批准后进入 P3（双列信息流 + 详情连真实 D1）。
 
 ## 已确认决策摘要
 

@@ -10,6 +10,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "../global.css";
 
+import { AuthProvider } from "@/features/auth/auth-provider";
 import { AppQueryProvider } from "@/providers/query-provider";
 import { ThemeProvider, useTheme } from "@/providers/theme-provider";
 
@@ -20,6 +21,7 @@ function ThemedRoot() {
 		<>
 			<Stack screenOptions={{ headerShown: false }}>
 				<Stack.Screen name="(tabs)" />
+				<Stack.Screen name="sign-in" />
 			</Stack>
 			<StatusBar style={resolvedScheme === "dark" ? "light" : "dark"} />
 		</>
@@ -34,9 +36,11 @@ export default function RootLayout() {
 					<KeyboardProvider>
 						<HeroUINativeProviderRaw>
 							<ToastProvider>
-								<ThemeProvider>
-									<ThemedRoot />
-								</ThemeProvider>
+								<AuthProvider>
+									<ThemeProvider>
+										<ThemedRoot />
+									</ThemeProvider>
+								</AuthProvider>
 								<PortalHost />
 							</ToastProvider>
 						</HeroUINativeProviderRaw>

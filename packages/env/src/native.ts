@@ -14,4 +14,12 @@ export function parseNativeEnv(
 	return nativeEnvSchema.parse(source);
 }
 
-export const getServerUrl = () => parseNativeEnv().EXPO_PUBLIC_SERVER_URL;
+export function getServerUrl(
+	fallback = "http://localhost:3000",
+	source: Record<string, unknown> = process.env,
+) {
+	return parseNativeEnv({
+		...source,
+		EXPO_PUBLIC_SERVER_URL: source.EXPO_PUBLIC_SERVER_URL ?? fallback,
+	}).EXPO_PUBLIC_SERVER_URL;
+}

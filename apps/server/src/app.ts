@@ -1,3 +1,4 @@
+import { createAuth } from "@xhs/auth";
 import { parseServerEnv } from "@xhs/env";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -33,8 +34,15 @@ app.use(
 
 			return undefined;
 		},
-		allowHeaders: ["Authorization", "Content-Type"],
+		allowHeaders: [
+			"Authorization",
+			"Content-Type",
+			"Cookie",
+			"Expo-Origin",
+			"X-Skip-OAuth-Proxy",
+		],
 		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+		exposeHeaders: ["Set-Cookie"],
 		credentials: true,
 		maxAge: 86400,
 	}),
@@ -47,5 +55,19 @@ app.get("/", (c) =>
 		time: new Date().toISOString(),
 	}),
 );
+
+app.on(["GET", "POST"], "/api/auth/*", (c) => {
+	const env = parseServerEnv(c.env);
+	const auth = createAuth({
+		secret: env.BETTER_AUTH_SECRET,
+		baseURL: env.BETTER_AUTH_URL,
+		d1: c.env.DB,
+		trustedOrigins: ["xhs://", env.CORS_ORIGIN, ...env.CORS_ORIGINS.split(",")]
+			.map((origin) => origin.trim())
+			.filter(Boolean),
+	});
+
+	return auth.handler(c.req.raw);
+});
 
 app.route("/", seedRoutes);

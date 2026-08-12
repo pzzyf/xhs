@@ -10,9 +10,14 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"better-auth": "1.6.26"
+		"@better-auth/drizzle-adapter": "1.6.26",
+		"@better-auth/expo": "1.6.26",
+		"@xhs/db": "workspace:*",
+		"better-auth": "1.6.26",
+		"drizzle-orm": "^0.44.4"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20260804.1",
 		"@xhs/config": "workspace:*",
 		"typescript": "^6.0.3"
 	}
