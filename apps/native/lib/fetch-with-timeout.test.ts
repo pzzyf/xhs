@@ -26,6 +26,35 @@ async function settlesRejected(promise: Promise<unknown>) {
 }
 
 describe("fetchWithTimeout", () => {
+	test("works without AbortSignal static composition APIs", async () => {
+		const url = startServer(() => Response.json({ ok: true }));
+		const anyDescriptor = Object.getOwnPropertyDescriptor(AbortSignal, "any");
+		const timeoutDescriptor = Object.getOwnPropertyDescriptor(
+			AbortSignal,
+			"timeout",
+		);
+		Object.defineProperty(AbortSignal, "any", {
+			configurable: true,
+			value: undefined,
+		});
+		Object.defineProperty(AbortSignal, "timeout", {
+			configurable: true,
+			value: undefined,
+		});
+
+		try {
+			const response = await fetchWithTimeout(new Request(url), 1_000);
+			expect(JSON.parse(await response.text())).toEqual({ ok: true });
+		} finally {
+			if (anyDescriptor) {
+				Object.defineProperty(AbortSignal, "any", anyDescriptor);
+			}
+			if (timeoutDescriptor) {
+				Object.defineProperty(AbortSignal, "timeout", timeoutDescriptor);
+			}
+		}
+	});
+
 	test("rejects when the caller signal was already aborted", async () => {
 		const url = startServer(() => new Response("unused"));
 		const caller = new AbortController();
@@ -53,6 +82,30 @@ describe("fetchWithTimeout", () => {
 		);
 		const response = await fetchWithTimeout(new Request(url), 25);
 
-		expect(await settlesRejected(response.json())).toBe("rejected");
+		expect(await settlesRejected(response.text())).toBe("rejected");
+	});
+
+	test("caller aborts while consuming a response body", async () => {
+		const url = startServer(
+			() =>
+				new Response(
+					new ReadableStream({
+						start(controller) {
+							controller.enqueue(new TextEncoder().encode('{"ok":'));
+						},
+					}),
+					{ headers: { "content-type": "application/json" } },
+				),
+		);
+		const caller = new AbortController();
+		const response = await fetchWithTimeout(
+			new Request(url, { signal: caller.signal }),
+			1_000,
+		);
+		const bodyState = settlesRejected(response.text());
+
+		caller.abort();
+
+		expect(await bodyState).toBe("rejected");
 	});
 });
