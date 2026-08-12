@@ -4,10 +4,34 @@
 
 ## 当前状态
 
-- **阶段**：P2（better-auth 注册登录登出 + Native 会话）—— **awaiting-human-review**
-- **总体状态**：鉴权主链路已实现并通过 Web/HTTP 验证；待用户批准进入 P3
+- **阶段**：P4（发布 + R2 上传）—— **in-progress**
+- **总体状态**：P3 已通过验收；用户豁免后续阶段审批，自动进入 P4
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P3 收尾（2026-08-12）
+
+已完成：
+
+- `packages/api/src/contract.ts`：`notes.list`（cursor 字符串、limit 1–20 默认 10）、`notes.get`、`health` 契约，Zod 校验测试覆盖非法 cursor/limit
+- `apps/server/src/rpc/`：`note-utils`（tags 解析、图片 URL、limit+1 分页）、`notes-service`（Drizzle 读 + 作者 join + `likeCount=count(*)` + `viewerHasLiked`）、`router`（oRPC implement，NOT_FOUND 中文 404）
+- `apps/server/src/app.ts`：`/rpc/*` 挂载（better-auth 会话注入 viewerUserId）+ 公共 `GET /images/*`（R2 读、immutable 缓存）
+- Native 数据层：`lib/server-url.ts`（平台默认 10.0.2.2）、`lib/orpc.ts`（类型化客户端、cookie 转发、10s 超时 + 取消）、`features/notes/queries.ts`（infiniteQuery/detail、query-options 稳定 key、分页去重）
+- 首页双列流：`NoteCard`（3:4 封面、两行标题、作者）、FlatList `numColumns=2` 无限滚动、loading/空/错/页脚态中文
+- 详情页：`app/note/[id].tsx` 大图/标题/作者/正文/标签/只读赞摘要（非交互、未登录可见）+ 无效 ID 与加载失败态；`note-route` 归一化测试
+
+验证（本地 alchemy dev + Metro Web :8081）：
+
+- `bun test` 53/53 通过（12 files）；`bun run check-types` 6/6 workspace；scoped Biome 32 文件 0 诊断；`expo install --check` 依赖一致
+- RPC：第一页 10 条（id 16..7，nextCursor "7"）→ 第二页 6 条（id 6..1，nextCursor null）；非法 cursor 400；不存在笔记 404
+- 详情：id=1 全字段、`viewerHasLiked=false`、`likeCount=0`、绝对图片 URL；`/images/seed/note-01.png` 200 `image/png`
+- Web（headless Chromium 390×844，未登录）：首页 10 卡 → 滚动加载第二页共 16 张、出现「已经到底了」、无重复；封面宽高比 0.75（3:4）、双列等宽 167px；列表无赞计数；详情完整且「只读展示」不可点；缺失笔记显示「笔记加载失败」+「重新加载」；控制台无新增运行错误（仅缺失探针的 404 RPC）
+
+环境事实：
+
+- 与 P2 相同：worktree 本地 D1 迁移记录存在但表缺失，验收时手动将 `0000` 迁移应用到 worktree D1；未修改主工作区数据
+- 将主工作区 `apps/server/.env` 复制到 worktree（gitignored，本地运行所需）；8081 空闲，Web 验收使用默认端口
+- 截图证据：`/tmp/p3-home-top.png`、`/tmp/p3-home-bottom.png`、`/tmp/p3-detail.png`、`/tmp/p3-detail-missing.png`
 
 ## P2 收尾（2026-08-12）
 
@@ -77,17 +101,17 @@
 |------|------|------|----------|------|
 | P0 | 完成（v0.1.0） | 2026-08-12 | `check-types` + Biome + `GET /` 健康检查 | 通过 |
 | P1 | 完成（v0.2.0） | 2026-08-12 | alchemy dev 迁移 + 种子 + D1 直查 | 通过 |
-| P2 | awaiting-human-review | 2026-08-12 | HTTP + Web 注册/登录/会话保持/登出 | 通过 |
-| P3 | pending | — | 双列流 + 详情连真实 D1 | — |
-| P4 | pending | — | 发布后列表可见（R2 图） | — |
+| P2 | 完成 | 2026-08-12 | HTTP + Web 注册/登录/会话保持/登出 | 通过 |
+| P3 | 完成 | 2026-08-12 | HTTP RPC + Web 双列流/详情/错误态 | 通过（用户豁免审查） |
+| P4 | in-progress | — | 发布后列表可见（R2 图） | — |
 | P5 | pending | — | 点赞 toggle 幂等 + 登录拦截 | — |
 | P6 | pending | — | 我的/设置/退出 + UI 打磨 | — |
 | P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
 
 ## 待办（当前步骤）
 
-1. **用户审查并批准 P2**（better-auth、Native 会话、登录/注册/退出与验证输出）。
-2. 用户批准后进入 P3（双列信息流 + 详情连真实 D1）。
+1. **实施 P4**：契约 `notes.create` + 图片上传（Worker 中转 PUT）+ 发布页；发布后列表可见。
+2. P4 完成后依次实施 P5（点赞）、P6（我的/设置）、P7（公网部署验收）。
 
 ## 已确认决策摘要
 

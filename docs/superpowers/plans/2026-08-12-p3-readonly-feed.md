@@ -1,6 +1,6 @@
 # P3 Readonly Feed Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a contract-first, read-only notes feed and detail flow backed by real D1/R2 seed data, with cursor pagination shared end to end through oRPC.
 
@@ -75,7 +75,7 @@
 - Consumes: `oc` from `@orpc/contract`, Zod 4.
 - Produces: `apiContract`, `noteListItemSchema`, `noteDetailSchema`, `notesListInputSchema`, `noteIdInputSchema`, `NoteListItem`, `NoteDetail`, `NotesListOutput`.
 
-- [ ] **Step 1: Write failing schema tests**
+- [x] **Step 1: Write failing schema tests**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -110,13 +110,13 @@ describe("notes contract inputs", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and verify the red state**
+- [x] **Step 2: Run the test and verify the red state**
 
 Run: `bun test packages/api/src/contract.test.ts`
 
 Expected: FAIL because the four schema exports do not exist.
 
-- [ ] **Step 3: Implement the complete contract**
+- [x] **Step 3: Implement the complete contract**
 
 Replace `packages/api/src/contract.ts` with:
 
@@ -187,7 +187,7 @@ Keep `packages/api/src/index.ts` as:
 export * from "./contract";
 ```
 
-- [ ] **Step 4: Run tests and type checking**
+- [x] **Step 4: Run tests and type checking**
 
 Run: `bun test packages/api/src/contract.test.ts`
 
@@ -197,7 +197,7 @@ Run: `bun run --cwd packages/api check-types`
 
 Expected: exit 0.
 
-- [ ] **Step 5: Check formatting**
+- [x] **Step 5: Check formatting**
 
 Run: `bunx biome check packages/api/src/contract.ts packages/api/src/contract.test.ts packages/api/src/index.ts`
 
@@ -222,7 +222,7 @@ git commit -m "feat(api): define read-only notes contract"
 - Consumes: database rows with numeric `id`, JSON `tags`, and R2 `imageKey`.
 - Produces: `parseTags(value)`, `buildImageUrl(origin, imageKey)`, `splitPage(rows, limit)`.
 
-- [ ] **Step 1: Write failing pure-unit tests**
+- [x] **Step 1: Write failing pure-unit tests**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -257,13 +257,13 @@ describe("note utils", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and verify the red state**
+- [x] **Step 2: Run the test and verify the red state**
 
 Run: `bun test apps/server/src/rpc/note-utils.test.ts`
 
 Expected: FAIL because `note-utils.ts` does not exist.
 
-- [ ] **Step 3: Implement the utilities**
+- [x] **Step 3: Implement the utilities**
 
 ```ts
 import { z } from "zod";
@@ -290,7 +290,7 @@ export function splitPage<T extends { id: number }>(rows: T[], limit: number) {
 }
 ```
 
-- [ ] **Step 4: Run tests and scoped checks**
+- [x] **Step 4: Run tests and scoped checks**
 
 Run: `bun test apps/server/src/rpc/note-utils.test.ts`
 
@@ -320,7 +320,7 @@ git commit -m "test(server): cover note pagination helpers"
 - Consumes: `Database`, request origin, optional `viewerUserId`, shared `apiContract`.
 - Produces: `NotesService.list(input)`, `NotesService.get(id, viewerUserId)`, `rpcRouter`, `RpcContext`.
 
-- [ ] **Step 1: Write failing router tests against a fake service**
+- [x] **Step 1: Write failing router tests against a fake service**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -378,13 +378,13 @@ describe("rpc router", () => {
 });
 ```
 
-- [ ] **Step 2: Run the router test and verify the red state**
+- [x] **Step 2: Run the router test and verify the red state**
 
 Run: `bun test apps/server/src/rpc/router.test.ts`
 
 Expected: FAIL because the service and router modules do not exist.
 
-- [ ] **Step 3: Define `NotesService` and implement Drizzle reads**
+- [x] **Step 3: Define `NotesService` and implement Drizzle reads**
 
 Use this public shape in `notes-service.ts`:
 
@@ -492,7 +492,7 @@ export function createNotesService(
 }
 ```
 
-- [ ] **Step 4: Implement the contract router**
+- [x] **Step 4: Implement the contract router**
 
 ```ts
 import { apiContract } from "@xhs/api";
@@ -523,7 +523,7 @@ export const rpcRouter = builder.router({
 });
 ```
 
-- [ ] **Step 5: Run router, utility, and type tests**
+- [x] **Step 5: Run router, utility, and type tests**
 
 Run: `bun test apps/server/src/rpc/note-utils.test.ts apps/server/src/rpc/router.test.ts`
 
@@ -553,7 +553,7 @@ git commit -m "feat(server): implement read-only notes RPC"
 - Consumes: `rpcRouter`, `createNotesService`, better-auth session, `DB`, `IMAGES`.
 - Produces: `GET|POST /rpc/*` and public `GET /images/*`.
 
-- [ ] **Step 1: Write failing R2 route tests**
+- [x] **Step 1: Write failing R2 route tests**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -602,13 +602,13 @@ describe("image routes", () => {
 });
 ```
 
-- [ ] **Step 2: Run the image test and verify the red state**
+- [x] **Step 2: Run the image test and verify the red state**
 
 Run: `bun test apps/server/src/routes/images.test.ts`
 
 Expected: FAIL because `images.ts` does not exist.
 
-- [ ] **Step 3: Implement the public image route**
+- [x] **Step 3: Implement the public image route**
 
 ```ts
 import { Hono } from "hono";
@@ -634,7 +634,7 @@ imageRoutes.get("/images/*", async (c) => {
 });
 ```
 
-- [ ] **Step 4: Mount image and RPC handlers in `app.ts`**
+- [x] **Step 4: Mount image and RPC handlers in `app.ts`**
 
 Add imports:
 
@@ -683,7 +683,7 @@ app.route("/", imageRoutes);
 
 Keep the seed route mounted once. Do not create a second Hono app or Worker entry point.
 
-- [ ] **Step 5: Run server tests and type checks**
+- [x] **Step 5: Run server tests and type checks**
 
 Run: `bun test apps/server/src/routes/images.test.ts apps/server/src/rpc`
 
@@ -719,7 +719,7 @@ git commit -m "feat(server): mount oRPC and public image reads"
 - Consumes: `apiContract`, `authClient.getCookie()`, `getServerUrl`, TanStack Query.
 - Produces: `orpc`, `notesKeys`, `useNotesList()`, `useNote(id)`, `flattenNotePages(pages)`.
 
-- [ ] **Step 1: Write failing page-flattening tests**
+- [x] **Step 1: Write failing page-flattening tests**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -753,13 +753,13 @@ describe("flattenNotePages", () => {
 });
 ```
 
-- [ ] **Step 2: Run the query test and verify the red state**
+- [x] **Step 2: Run the query test and verify the red state**
 
 Run: `bun test apps/native/features/notes/queries.test.ts`
 
 Expected: FAIL because `queries.ts` does not exist.
 
-- [ ] **Step 3: Centralize the Native server URL**
+- [x] **Step 3: Centralize the Native server URL**
 
 Create `apps/native/lib/server-url.ts`:
 
@@ -777,7 +777,7 @@ export const nativeServerUrl = getServerUrl(defaultServerUrl).replace(/\/$/, "")
 
 Update `auth-client.ts` to import `nativeServerUrl`, remove its duplicate `getServerUrl` and `Platform` imports/constants, and set `baseURL: nativeServerUrl`.
 
-- [ ] **Step 4: Create the typed oRPC client with auth-cookie forwarding**
+- [x] **Step 4: Create the typed oRPC client with auth-cookie forwarding**
 
 ```ts
 import { createORPCClient } from "@orpc/client";
@@ -821,7 +821,7 @@ export const orpc: ContractRouterClient<typeof apiContract> =
 	createORPCClient(link);
 ```
 
-- [ ] **Step 5: Implement stable list/detail query hooks**
+- [x] **Step 5: Implement stable list/detail query hooks**
 
 ```ts
 import type { NoteListItem, NotesListOutput } from "@xhs/api";
@@ -866,7 +866,7 @@ export function useNote(id: string | null) {
 }
 ```
 
-- [ ] **Step 6: Run query tests and Native type checks**
+- [x] **Step 6: Run query tests and Native type checks**
 
 Run: `bun test apps/native/features/notes/queries.test.ts`
 
@@ -899,7 +899,7 @@ git commit -m "feat(native): add typed notes queries"
 - Consumes: `NoteListItem`, `useNotesList()`, `flattenNotePages()`, theme colors, existing publish gate.
 - Produces: stable two-column cards, initial/empty/error/footer states, detail navigation.
 
-- [ ] **Step 1: Create a focused note card component**
+- [x] **Step 1: Create a focused note card component**
 
 Implement `NoteCard` with this exact public interface:
 
@@ -926,7 +926,7 @@ The component must be one `Pressable` containing:
 
 Use these layout values: `borderRadius: 18`, `overflow: "hidden"`, `borderWidth: 1`, `cover.aspectRatio: 3 / 4`, `copy.padding: 10`, `copy.gap: 6`, title size 15/20 with weight 700, author size 12/16. The card receives half the available row width through the list column wrapper, not a hard-coded device width.
 
-- [ ] **Step 2: Replace the home empty card with a FlatList**
+- [x] **Step 2: Replace the home empty card with a FlatList**
 
 Keep the existing header and `openPublish` behavior. Add:
 
@@ -990,7 +990,7 @@ Render `FlatList` with:
 
 Define `FeedMessage` in the same file because it is page-specific. Set `styles.row` to `gap: 12`, `styles.column` to `flex: 1`, `styles.listContent` to `paddingBottom: 28` and `gap: 12`, and `styles.footer` to centered 13px text with 20px vertical padding.
 
-- [ ] **Step 3: Run focused verification**
+- [x] **Step 3: Run focused verification**
 
 Run: `bun run --cwd apps/native check-types`
 
@@ -1000,7 +1000,7 @@ Run: `bunx biome check 'apps/native/app/(tabs)/index.tsx' apps/native/features/n
 
 Expected: no diagnostics.
 
-- [ ] **Step 4: Manually inspect the home screen**
+- [x] **Step 4: Manually inspect the home screen**
 
 With the server and Expo web client running, verify: header remains visible, cards have equal widths, covers stay 3:4, titles clamp to two lines, no like count is rendered, and the second page appends without duplicates or scroll jumps.
 
@@ -1025,7 +1025,7 @@ git commit -m "feat(native): render paginated two-column feed"
 - Consumes: Expo Router `id`, `useNote(id)`, `NoteDetail`, theme colors.
 - Produces: normalized route ID and a public, non-interactive detail view.
 
-- [ ] **Step 1: Write a failing route-normalization test**
+- [x] **Step 1: Write a failing route-normalization test**
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -1046,13 +1046,13 @@ describe("normalizeNoteId", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and verify the red state**
+- [x] **Step 2: Run the test and verify the red state**
 
 Run: `bun test apps/native/features/notes/note-route.test.ts`
 
 Expected: FAIL because `note-route.ts` does not exist.
 
-- [ ] **Step 3: Implement route normalization**
+- [x] **Step 3: Implement route normalization**
 
 ```ts
 export function normalizeNoteId(
@@ -1063,7 +1063,7 @@ export function normalizeNoteId(
 }
 ```
 
-- [ ] **Step 4: Implement the detail screen**
+- [x] **Step 4: Implement the detail screen**
 
 Use `useLocalSearchParams<{ id?: string | string[] }>()`, normalize the ID, and call `useNote(id)`. Render these exact states:
 
@@ -1102,7 +1102,7 @@ The like summary must be `View`, never `Pressable`. Use `hero.width: "100%"`, `h
 
 Add `<Stack.Screen name="note/[id]" />` inside the existing root Stack.
 
-- [ ] **Step 5: Run tests and focused checks**
+- [x] **Step 5: Run tests and focused checks**
 
 Run: `bun test apps/native/features/notes/note-route.test.ts`
 
@@ -1116,7 +1116,7 @@ Run: `bunx biome check 'apps/native/app/note/[id].tsx' apps/native/features/note
 
 Expected: no diagnostics.
 
-- [ ] **Step 6: Manually inspect strict read-only behavior**
+- [x] **Step 6: Manually inspect strict read-only behavior**
 
 Verify an unauthenticated user can open a detail page. Confirm the page contains no like `Pressable`, no sign-in navigation from the like summary, no mutation call, and no list like count.
 
@@ -1139,7 +1139,7 @@ git commit -m "feat(native): add read-only note details"
 - Consumes: all earlier tasks, local Alchemy D1/R2, existing `apps/server/.env` seed secret.
 - Produces: fresh verification evidence and an `awaiting-human-review` P3 checkpoint.
 
-- [ ] **Step 1: Run all automated checks from a clean process state**
+- [x] **Step 1: Run all automated checks from a clean process state**
 
 Run: `bun test`
 
@@ -1157,7 +1157,7 @@ Run from `apps/native`: `bunx expo install --check`
 
 Expected: `Dependencies are up to date`.
 
-- [ ] **Step 2: Start the Worker and seed local D1/R2**
+- [x] **Step 2: Start the Worker and seed local D1/R2**
 
 Run in terminal A: `bun run dev:server`
 
@@ -1173,7 +1173,7 @@ unset P3_SEED_SECRET
 
 Expected: JSON reports at least 16 notes; `skipped` may be either true or false.
 
-- [ ] **Step 3: Verify oRPC pagination and errors over HTTP**
+- [x] **Step 3: Verify oRPC pagination and errors over HTTP**
 
 Run:
 
@@ -1203,7 +1203,7 @@ curl --noproxy '*' -sS -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1
 
 Expected: 400 then 404.
 
-- [ ] **Step 4: Verify detail and public R2 images**
+- [x] **Step 4: Verify detail and public R2 images**
 
 Run:
 
@@ -1214,7 +1214,7 @@ curl --noproxy '*' -sS -o /dev/null -w '%{http_code} %{content_type}\n' http://1
 
 Expected: detail includes all contract fields, `viewerHasLiked: false`, a nonnegative `likeCount`, and an absolute image URL; image request returns 200 with `content-type: image/png`.
 
-- [ ] **Step 5: Verify the Native/Web user path**
+- [x] **Step 5: Verify the Native/Web user path**
 
 Run in terminal C: `bun run dev:native`
 
@@ -1228,7 +1228,7 @@ Verify this sequence without logging in:
 6. Confirm the browser console or Metro output contains no new runtime error.
 7. Capture one home-feed screenshot and one detail screenshot for the P3 review evidence.
 
-- [ ] **Step 6: Update stage documentation with observed evidence**
+- [x] **Step 6: Update stage documentation with observed evidence**
 
 In `plan/P3.md`, mark only checklist items proven by Steps 1–5. In `workflow-state.md`:
 
@@ -1237,7 +1237,7 @@ In `plan/P3.md`, mark only checklist items proven by Steps 1–5. In `workflow-s
 - Move P2 to completed while retaining its evidence.
 - Keep P4 as pending.
 
-- [ ] **Step 7: Run final diff and documentation checks**
+- [x] **Step 7: Run final diff and documentation checks**
 
 Run: `git diff --check`
 
