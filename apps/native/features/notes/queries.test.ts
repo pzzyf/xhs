@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { NotesListOutput } from "@xhs/api";
-import { flattenNotePages } from "./queries";
+import { flattenNotePages } from "./note-pages";
 
 const item = (id: string) => ({
 	id,
