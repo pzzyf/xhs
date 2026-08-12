@@ -4,10 +4,30 @@
 
 ## 当前状态
 
-- **阶段**：P4（发布 + R2 上传）—— **in-progress**
-- **总体状态**：P3 已通过验收；用户豁免后续阶段审批，自动进入 P4
+- **阶段**：P5（点赞 toggle + 登录拦截）—— **in-progress**
+- **总体状态**：P4 已通过验收；用户豁免审批，自动继续
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P4 收尾（2026-08-12）
+
+已完成：
+
+- `PUT /api/images`：better-auth 会话鉴权、Content-Type image/* 校验、10MB 上限、`notes/<uuid>.<ext>` key、R2 写入、返回 key/url；未登录 401
+- `apps/server/src/auth.ts`：抽取 createAuth/getSession 复用，app.ts 三处挂载（auth/rpc/upload）统一
+- 契约 `notes.create({ title ≤40, body ≤2000, tags ≤5 个且每个 ≤20 字, imageKey })` → `NoteDetail`；oRPC 未登录 UNAUTHORIZED
+- `notes-service.create`：Drizzle insert + returning + 返回详情；FakeD1 支持 insert 测试
+- Native 发布页 `app/publish.tsx`：选图（expo-image-picker）→ 预览 → 压缩（最长边 1600，jpeg）→ 上传 → 创建 → 首页刷新；失败 Toast + 表单保留；未登录直接引导登录
+- 首页「发布」按钮接入发布页（原占位提示移除）
+
+验证（`alchemy dev` + Metro Web :8081）：
+
+- `bun test` 67/67 通过（13 files）；`check-types` 6/6；Biome 37 文件 0 诊断；`expo install --check` 依赖一致
+- HTTP：带会话 PUT 小图 → 200 + key；无会话 401；`GET /images/<key>` 200 image/png；`notes.create` 200（id=17）且列表置顶；无会话 create 401
+- Web 全流程（headless Chromium）：未登录点发布 → 注册 → 发布页选图/填表 → 发布成功回首页且新笔记置顶、作者正确、首卡图片真实加载（R2）→ 详情含正文/标签/只读赞摘要；控制台 0 error
+- 截图：`/tmp/p4-publish.png`、`/tmp/p4-home-new-note.png`、`/tmp/p4-detail-new-note.png`
+
+环境事实：发布验收新增本地用户与笔记（worktree D1/R2，未触碰主工作区）。
 
 ## P3 收尾（2026-08-12）
 
@@ -103,15 +123,15 @@
 | P1 | 完成（v0.2.0） | 2026-08-12 | alchemy dev 迁移 + 种子 + D1 直查 | 通过 |
 | P2 | 完成 | 2026-08-12 | HTTP + Web 注册/登录/会话保持/登出 | 通过 |
 | P3 | 完成 | 2026-08-12 | HTTP RPC + Web 双列流/详情/错误态 | 通过（用户豁免审查） |
-| P4 | in-progress | — | 发布后列表可见（R2 图） | — |
+| P4 | 完成 | 2026-08-12 | HTTP 上传/创建 + Web 发布全流程 | 通过 |
 | P5 | pending | — | 点赞 toggle 幂等 + 登录拦截 | — |
 | P6 | pending | — | 我的/设置/退出 + UI 打磨 | — |
 | P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
 
 ## 待办（当前步骤）
 
-1. **实施 P4**：契约 `notes.create` + 图片上传（Worker 中转 PUT）+ 发布页；发布后列表可见。
-2. P4 完成后依次实施 P5（点赞）、P6（我的/设置）、P7（公网部署验收）。
+1. **实施 P5**：点赞 toggle 幂等 + 登录拦截 + 回首页策略。
+2. P5 完成后依次实施 P6（我的/设置）、P7（公网部署验收）。
 
 ## 已确认决策摘要
 
