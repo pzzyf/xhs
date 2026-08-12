@@ -196,7 +196,8 @@ function DetailMessage({
 
 const styles = StyleSheet.create({
 	scrollContent: {
-		paddingBottom: 40,
+		// Android 系统导航条/手势区会遮挡底部内容，留足安全区
+		paddingBottom: 96,
 	},
 	hero: {
 		aspectRatio: 3 / 4,

@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import { Platform } from "react-native";
 import { authClient } from "./auth-client";
 import { nativeServerUrl } from "./server-url";
@@ -25,17 +26,17 @@ export async function uploadImage(
 		"expo-origin": "xhs://",
 		...(cookie ? { cookie } : {}),
 	};
-	// Web 用 Blob；Native 由 RN 网络层把 { uri, type, name } 作为文件请求体发送。
+	// Web 用 Blob；Native 读成 ArrayBuffer（RN fetch 对 {uri,type,name} 对象体不支持）。
 	const body =
 		Platform.OS === "web"
 			? await (await fetch(file.uri)).blob()
-			: { uri: file.uri, name: file.fileName, type: file.mimeType };
+			: await new File(file.uri).arrayBuffer();
 
 	try {
 		const response = await fetch(`${nativeServerUrl}/api/images`, {
 			method: "PUT",
 			headers,
-			body: body as BodyInit,
+			body,
 			credentials: "include",
 			signal: controller.signal,
 		});

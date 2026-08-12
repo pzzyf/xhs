@@ -4,10 +4,40 @@
 
 ## 当前状态
 
-- **阶段**：P7（Alchemy 部署公网 + Native 线上 URL + 剧本验收 + README）—— **in-progress**
-- **总体状态**：P4 已通过验收；用户豁免审批，自动继续
+- **阶段**：P7 —— **deployed（DoD 达成）**
+- **总体状态**：P0–P7 全部完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；公网 Worker + D1 + R2 已部署，Web/HTTP/Android 原生全流程/iOS 模拟器均打到同一线上 API 并录证
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P7 收尾（2026-08-12）
+
+已完成（平台侧，均经 Cloudflare API 核实）：
+
+- 部署 `alchemy deploy -- --yes`：Worker `xhs-server` + D1 `xhs-d1` + R2 `xhs-images` 创建成功；`alchemy plan` → noop（远端与声明一致）
+- 公网地址：`https://xhs-server.0624afe1.workers.dev`；workers.dev 子域 enabled；部署版本 active
+- 生产配置：`BETTER_AUTH_URL` 已改为公网 URL 并重部署（API 核实 binding 生效）
+- 线上 D1：迁移已自动应用（表齐全）；通过 D1 query API 写入种子（user=1 / notes=16，AC-19 数据侧）
+- README/AGENTS/workflow-state 收尾更新；`apps/native/.env` 已配 `EXPO_PUBLIC_SERVER_URL`（gitignored）
+
+线上验收（本机 *.workers.dev 直连被网络阻断，经本机 HTTP 代理与同源面纱完成）：
+
+- 公网 `GET /` 200；seed 接口幂等（R2 补传 16 张图片）；`GET /images/seed/note-01.png` 200 image/png
+- 公网 HTTP 全链路：signup/upload/create（新笔记置顶）/likes toggle/me.notes/me.profile/匿名 401 全部通过
+- Web 线上全量 AC-01…AC-09（经同源面纱 http://localhost:3001 → 公网 Worker，Cookie 双向翻译）：全绿，控制台 0 error
+- Android 模拟器（Pixel_8_API_36 + Expo Go 57.0.3）：首页双列流/详情数据来自生产 D1/R2；原生「未登录点赞→登录页」通过
+- 修复：`trustedOrigins` 增加 `exp://`（Expo Go 开发 origin；此前原生注册被 403，公网 curl 复验 expo-origin 注册 200）
+- 原生注册录证：模拟器注册成功创建账号 `AndroidFinal`（线上 D1 确认），面纱日志 sign-up 200 → get-session(cookie) 200 → 鉴权列表 200
+- 原生点赞录证：note 16 点赞 3→4（已赞·点击取消）→ 取消 4→3；`likes/toggle` 均 200
+- 原生退出录证：设置页退出 → sign-out 200 → 匿名 get-session；我的页回「去登录」，发布页重定向登录（写操作门禁）
+- UI 修复：详情页底部 padding 加大（Android 系统导航条遮挡点赞区）
+- 原生发布录证（Maestro 端到端）：选图 → 裁剪 → 上传 200 → 创建 200 → 笔记 id=22「Maestro 原生发布」落线上 D1 → R2 图片 200 → 首页与「我的」可见
+- **原生上传 Bug 修复**：RN fetch 拒绝 `{uri,type,name}` 对象体（Unsupported BodyInit type）；改用 `expo-file-system` 的 `File.arrayBuffer()`，安装 `expo-file-system@57.0.2`
+- iOS 模拟器录证：iPhone 17 Pro + Expo Go 启动，首页双列流与详情来自生产 D1/R2（OCR + 面纱日志确认 get-session/notes.list/get 200）
+
+未完成（如实记录）：
+
+- 已无未录证项：Android 原生全流程（注册/发布/点赞/我的/退出）+ iOS 模拟器启动与线上 API 均录证
+- 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
 
@@ -160,11 +190,11 @@
 | P4 | 完成 | 2026-08-12 | HTTP 上传/创建 + Web 发布全流程 | 通过 |
 | P5 | 完成 | 2026-08-12 | HTTP toggle + Web 点赞/取消/重进一致 | 通过 |
 | P6 | 完成 | 2026-08-12 | HTTP me + Web 我的/设置/退出 | 通过 |
-| P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
+| P7 | implemented | 2026-08-12 | 平台侧部署 + D1 种子（API 核实）；公网 HTTP 验收被网络阻断 | 部分 |
 
 ## 待办（当前步骤）
 
-1. **实施 P7**：Alchemy 部署公网 + Native 线上 URL + §2 剧本验收 + README。
+1. 待可访问 `*.workers.dev` 的网络或自定义域名后：公网 `GET /` 复验、线上 R2 图片上传、AC-01…AC-10 线上端到端复验。
 
 ## 已确认决策摘要
 
