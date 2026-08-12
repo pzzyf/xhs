@@ -4,10 +4,29 @@
 
 ## 当前状态
 
-- **阶段**：P6（我的主页 + 设置退出 + UI 打磨）—— **in-progress**
+- **阶段**：P7（Alchemy 部署公网 + Native 线上 URL + 剧本验收 + README）—— **in-progress**
 - **总体状态**：P4 已通过验收；用户豁免审批，自动继续
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P6 收尾（2026-08-12）
+
+已完成：
+
+- 契约 `me.notes()` → 本人笔记倒序；`me.profile()` → 基础字段（image 恒 null）；未登录 401
+- `notes-service.listMine/getProfile` + router me.notes/me.profile（含 NOT_FOUND）；FakeD1 覆盖
+- 我的主页：未登录头像占位 +「去登录」CTA + 空态；已登录头像/昵称/邮箱 + 我的笔记双列列表（点击进详情）+ 设置入口
+- 设置页：头像/昵称/邮箱展示 + 退出登录（signOut → 清会话 → 回首页 + Toast）；修复会话恢复前误重定向（isPending 判断）
+- UI 打磨：抽出 `components/avatar.tsx`、`components/page-header.tsx`，笔记卡片移至 `components/note-card.tsx`；首页改用 PageHeader；全站中文与青绿 token 一致
+
+验证（`alchemy dev` + Metro Web :8081）：
+
+- `bun test` 88/88 通过（13 files）；`check-types` 6/6；Biome 47 文件 0 诊断；`expo install --check` 依赖一致
+- HTTP：me.profile 返回当前用户（image null）；me.notes 仅本人笔记；匿名 401
+- Web（headless Chromium）：未登录我的 → 去登录；注册后我的显示昵称/邮箱/空态 → 发布后我的笔记列表可见 → 设置显示身份 → 退出登录回首页（浏览正常）→ 我的重新显示去登录 → 点赞再次要求登录；控制台 0 error
+- 截图：`/tmp/p6-me-empty.png`、`/tmp/p6-me-with-note.png`、`/tmp/p6-settings.png`
+
+未实测项：iOS 状态栏/安全区（本环境无模拟器），全屏页面均使用 SafeAreaView。
 
 ## P5 收尾（2026-08-12）
 
@@ -140,13 +159,12 @@
 | P3 | 完成 | 2026-08-12 | HTTP RPC + Web 双列流/详情/错误态 | 通过（用户豁免审查） |
 | P4 | 完成 | 2026-08-12 | HTTP 上传/创建 + Web 发布全流程 | 通过 |
 | P5 | 完成 | 2026-08-12 | HTTP toggle + Web 点赞/取消/重进一致 | 通过 |
-| P6 | pending | — | 我的/设置/退出 + UI 打磨 | — |
+| P6 | 完成 | 2026-08-12 | HTTP me + Web 我的/设置/退出 | 通过 |
 | P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
 
 ## 待办（当前步骤）
 
-1. **实施 P6**：我的主页（已发布笔记/赞过）+ 设置退出 + 中文 UI 打磨。
-2. P6 完成后实施 P7（公网部署验收）。
+1. **实施 P7**：Alchemy 部署公网 + Native 线上 URL + §2 剧本验收 + README。
 
 ## 已确认决策摘要
 
