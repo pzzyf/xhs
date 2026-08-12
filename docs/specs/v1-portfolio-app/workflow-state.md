@@ -4,8 +4,8 @@
 
 ## 当前状态
 
-- **阶段**：P7 —— **implemented**（平台侧已部署；公网验收被网络阻断）
-- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成，线上复验待可访问 `*.workers.dev` 的网络或自定义域名
+- **阶段**：P7 —— **deployed**（公网 HTTP + Web 线上主路径通过；模拟器完整录证部分完成）
+- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成并通过公网 HTTP/Web 线上验收；Android 模拟器已打到同一线上 API；iOS 模拟器未跑
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
 
@@ -19,11 +19,17 @@
 - 线上 D1：迁移已自动应用（表齐全）；通过 D1 query API 写入种子（user=1 / notes=16，AC-19 数据侧）
 - README/AGENTS/workflow-state 收尾更新；`apps/native/.env` 已配 `EXPO_PUBLIC_SERVER_URL`（gitignored）
 
-阻断与未完成（外部状态，非代码问题）：
+线上验收（本机 *.workers.dev 直连被网络阻断，经本机 HTTP 代理与同源面纱完成）：
 
-- 本机网络对 `*.workers.dev` 全域 TLS 阻断（连 `workers.dev` 根域也 reset；`cloudflare.com` 正常），公网 HTTP 验收（AC-10）与模拟器线上复验无法在本环境执行
-- OAuth 凭据无 r2 scope，线上 R2 种子图片对象未上传（需 r2 scope 凭据或可访问网络后经应用/seed 接口上传）
-- 建议：绑定自定义域名（账号当前无 zone）或在可访问该域名的网络下完成 AC-01…AC-10 线上复验
+- 公网 `GET /` 200；seed 接口幂等（R2 补传 16 张图片）；`GET /images/seed/note-01.png` 200 image/png
+- 公网 HTTP 全链路：signup/upload/create（新笔记置顶）/likes toggle/me.notes/me.profile/匿名 401 全部通过
+- Web 线上全量 AC-01…AC-09（经同源面纱 http://localhost:3001 → 公网 Worker，Cookie 双向翻译）：全绿，控制台 0 error
+- Android 模拟器（Pixel_8_API_36 + Expo Go 57.0.3）：首页双列流/详情数据来自生产 D1/R2；原生「未登录点赞→登录页」通过
+
+未完成（如实记录）：
+
+- 模拟器完整录证仅部分：Android 原生注册/发布/点赞/退出的完整 UI 剧本未录（adb 自动化不稳，线上 D1 无对应测试账号）；iOS 模拟器未跑
+- 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
 
