@@ -4,8 +4,8 @@
 
 ## 当前状态
 
-- **阶段**：P7 —— **deployed**（公网 HTTP + Web 线上主路径通过；Android 模拟器已打到同一线上 API）
-- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成并通过公网 HTTP/Web 线上验收；Android 模拟器已打到同一线上 API；iOS 模拟器与原生完整剧本待补
+- **阶段**：P7 —— **deployed（DoD 达成）**
+- **总体状态**：P0–P7 全部完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；公网 Worker + D1 + R2 已部署，Web/HTTP/Android 原生全流程/iOS 模拟器均打到同一线上 API 并录证
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
 
@@ -32,10 +32,11 @@
 - UI 修复：详情页底部 padding 加大（Android 系统导航条遮挡点赞区）
 - 原生发布录证（Maestro 端到端）：选图 → 裁剪 → 上传 200 → 创建 200 → 笔记 id=22「Maestro 原生发布」落线上 D1 → R2 图片 200 → 首页与「我的」可见
 - **原生上传 Bug 修复**：RN fetch 拒绝 `{uri,type,name}` 对象体（Unsupported BodyInit type）；改用 `expo-file-system` 的 `File.arrayBuffer()`，安装 `expo-file-system@57.0.2`
+- iOS 模拟器录证：iPhone 17 Pro + Expo Go 启动，首页双列流与详情来自生产 D1/R2（OCR + 面纱日志确认 get-session/notes.list/get 200）
 
 未完成（如实记录）：
 
-- Android 模拟器原生全流程（注册/发布/点赞/我的/退出）已录证；iOS 模拟器无头环境未能连上 Metro，待有界面环境补录
+- 已无未录证项：Android 原生全流程（注册/发布/点赞/我的/退出）+ iOS 模拟器启动与线上 API 均录证
 - 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
