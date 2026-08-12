@@ -22,6 +22,7 @@ function ThemedRoot() {
 			<Stack screenOptions={{ headerShown: false }}>
 				<Stack.Screen name="(tabs)" />
 				<Stack.Screen name="sign-in" />
+				<Stack.Screen name="note/[id]" />
 			</Stack>
 			<StatusBar style={resolvedScheme === "dark" ? "light" : "dark"} />
 		</>
