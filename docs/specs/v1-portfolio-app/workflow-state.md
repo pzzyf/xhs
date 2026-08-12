@@ -4,10 +4,26 @@
 
 ## 当前状态
 
-- **阶段**：P7（Alchemy 部署公网 + Native 线上 URL + 剧本验收 + README）—— **in-progress（已恢复）**
-- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；继续 P7
+- **阶段**：P7 —— **implemented**（平台侧已部署；公网验收被网络阻断）
+- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成，线上复验待可访问 `*.workers.dev` 的网络或自定义域名
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P7 收尾（2026-08-12）
+
+已完成（平台侧，均经 Cloudflare API 核实）：
+
+- 部署 `alchemy deploy -- --yes`：Worker `xhs-server` + D1 `xhs-d1` + R2 `xhs-images` 创建成功；`alchemy plan` → noop（远端与声明一致）
+- 公网地址：`https://xhs-server.0624afe1.workers.dev`；workers.dev 子域 enabled；部署版本 active
+- 生产配置：`BETTER_AUTH_URL` 已改为公网 URL 并重部署（API 核实 binding 生效）
+- 线上 D1：迁移已自动应用（表齐全）；通过 D1 query API 写入种子（user=1 / notes=16，AC-19 数据侧）
+- README/AGENTS/workflow-state 收尾更新；`apps/native/.env` 已配 `EXPO_PUBLIC_SERVER_URL`（gitignored）
+
+阻断与未完成（外部状态，非代码问题）：
+
+- 本机网络对 `*.workers.dev` 全域 TLS 阻断（连 `workers.dev` 根域也 reset；`cloudflare.com` 正常），公网 HTTP 验收（AC-10）与模拟器线上复验无法在本环境执行
+- OAuth 凭据无 r2 scope，线上 R2 种子图片对象未上传（需 r2 scope 凭据或可访问网络后经应用/seed 接口上传）
+- 建议：绑定自定义域名（账号当前无 zone）或在可访问该域名的网络下完成 AC-01…AC-10 线上复验
 
 ## P6 收尾（2026-08-12）
 
@@ -160,11 +176,11 @@
 | P4 | 完成 | 2026-08-12 | HTTP 上传/创建 + Web 发布全流程 | 通过 |
 | P5 | 完成 | 2026-08-12 | HTTP toggle + Web 点赞/取消/重进一致 | 通过 |
 | P6 | 完成 | 2026-08-12 | HTTP me + Web 我的/设置/退出 | 通过 |
-| P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
+| P7 | implemented | 2026-08-12 | 平台侧部署 + D1 种子（API 核实）；公网 HTTP 验收被网络阻断 | 部分 |
 
 ## 待办（当前步骤）
 
-1. **实施 P7**：Alchemy 部署公网 + Native 线上 URL + §2 剧本验收 + README。
+1. 待可访问 `*.workers.dev` 的网络或自定义域名后：公网 `GET /` 复验、线上 R2 图片上传、AC-01…AC-10 线上端到端复验。
 
 ## 已确认决策摘要
 

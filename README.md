@@ -1,8 +1,9 @@
 # xhs
 
-小红书风格内容社区 App（作品集向）—— Expo（iOS + Android）+ Hono on Cloudflare Workers + D1 + R2 + better-auth + oRPC + Drizzle + Alchemy。
+小红书风格内容社区 App（作品集向）—— Expo（iOS + Android）+ Hono on Cloudflare Workers + D1 + R2 + better-auth + oRPC + Drizzle + Alchemy，Bun monorepo（Turbo）。
 
-> 权威需求与进度见 `docs/specs/v1-portfolio-app/`（requirements / spec / plan / workflow-state）。当前阶段：P0 骨架已就绪。
+> 权威需求与进度：`docs/specs/v1-portfolio-app/`（requirements / spec / plan / workflow-state）。
+> 当前状态：P0–P6 已实现并验收（P3/P4/P5 里程碑 tag：`v0.4.0` / `v0.5.0` / `v0.6.0`）；P7 已部署至公网，线上验收待可访问网络/自定义域名。
 
 ## 仓库结构
 
@@ -40,30 +41,39 @@ cp apps/server/.env.example apps/server/.env   # 填入 BETTER_AUTH_SECRET 等
 bun run dev:server
 curl http://localhost:3000/                    # 健康检查
 
+# 种子数据（幂等：demo 用户 + 16 条中文笔记 + R2 占位图）
+curl -X POST http://localhost:3000/api/dev/seed -H "x-seed-secret: <SEED_SECRET>"
+
 # 客户端（Expo）
 cp apps/native/.env.example apps/native/.env   # EXPO_PUBLIC_SERVER_URL 指向服务端
-bun run dev:native
+bun run dev:native                             # Web: http://localhost:8081
 ```
 
 ## 常用命令
 
 ```bash
-bun run check-types   # 全仓类型检查（Turbo）
-bun run check         # Biome 格式化 + Lint
-bunx expo install --check   #（apps/native）校验 Expo 依赖对齐
-bun run alchemy:plan  # 查看 Cloudflare 资源变更计划
-bun run alchemy:deploy # 部署 Worker + D1 + R2 到公网
+bun run check-types            # 全仓类型检查（Turbo）
+bun run check                  # Biome 格式化 + Lint
+bunx expo install --check      #（apps/native）校验 Expo 依赖对齐
+bun run alchemy:plan           # 查看 Cloudflare 资源变更计划
+bun run alchemy:deploy -- --yes  # 部署 Worker + D1 + R2 到公网（非交互确认）
 ```
 
 ## 部署
 
 ```bash
 cp packages/infra/.env.example packages/infra/.env  # Cloudflare 凭据（不入库）
-cp apps/server/.env.example apps/server/.env        # 线上 BETTER_AUTH_URL 等
-bun run alchemy:plan && bun run alchemy:deploy
+cp apps/server/.env.example apps/server/.env        # BETTER_AUTH_URL 指向线上 URL
+bun run alchemy:plan && bun run alchemy:deploy -- --yes
 ```
 
-部署后把 `apps/native/.env` 的 `EXPO_PUBLIC_SERVER_URL` 指向公网地址。
+- 当前线上地址：`https://xhs-server.0624afe1.workers.dev`（Cloudflare 平台侧已部署：Worker + D1 + R2；D1 已应用迁移并写入种子 user=1 / notes=16）
+- 注意：`*.workers.dev` 在部分网络（如中国大陆直连）不可达；如需公网验收请绑定自定义域名（Cloudflare zone）或在可访问该域名的网络下进行
+- 部署后把 `apps/native/.env` 的 `EXPO_PUBLIC_SERVER_URL` 指向公网地址
+
+## 线上验收剧本
+
+`docs/specs/v1-portfolio-app/requirements.md` §4 的 AC-01…AC-10 已在本地 alchemy + Expo Web 全量走通（注册/发布/点赞/我的/设置/退出，控制台 0 error）；针对线上 URL 的复验需在可访问 `*.workers.dev` 的网络/自定义域名下执行。
 
 ## 安全与约定
 

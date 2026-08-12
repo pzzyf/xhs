@@ -36,4 +36,4 @@
 
 ## 当前阶段
 
-P0（骨架）已完成初验，待用户批准进入 P1。进度见 `docs/specs/v1-portfolio-app/workflow-state.md`。
+P0–P6 已完成并验收；P7 已部署至公网（Worker + D1 + R2，`https://xhs-server.0624afe1.workers.dev`），线上端到端复验待可访问 `*.workers.dev` 的网络或自定义域名。里程碑 tag：P0–P5 对应 `v0.1.0`–`v0.6.0`。进度见 `docs/specs/v1-portfolio-app/workflow-state.md`。
