@@ -1,12 +1,13 @@
 import { RPCHandler } from "@orpc/server/fetch";
-import { createAuth } from "@xhs/auth";
 import { createDb } from "@xhs/db";
 import { parseServerEnv } from "@xhs/env";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { createAppAuth, resolveSessionUserId } from "./auth";
 import { imageRoutes } from "./routes/images";
 import { seedRoutes } from "./routes/seed";
+import { createUploadRoutes } from "./routes/upload";
 import { createNotesService } from "./rpc/notes-service";
 import { rpcRouter } from "./rpc/router";
 import type { ServerEnv } from "./types";
@@ -18,6 +19,10 @@ const privateNetworkOriginPattern =
 
 export const app = new Hono<{ Bindings: ServerEnv }>();
 const rpcHandler = new RPCHandler(rpcRouter);
+const uploadRoutes = createUploadRoutes((headers, env) => {
+	const parsed = parseServerEnv(env);
+	return resolveSessionUserId(parsed, env.DB, headers);
+});
 
 app.use(logger());
 app.use(
@@ -64,35 +69,24 @@ app.get("/", (c) =>
 
 app.on(["GET", "POST"], "/api/auth/*", (c) => {
 	const env = parseServerEnv(c.env);
-	const auth = createAuth({
-		secret: env.BETTER_AUTH_SECRET,
-		baseURL: env.BETTER_AUTH_URL,
-		d1: c.env.DB,
-		trustedOrigins: ["xhs://", env.CORS_ORIGIN, ...env.CORS_ORIGINS.split(",")]
-			.map((origin) => origin.trim())
-			.filter(Boolean),
-	});
+	const auth = createAppAuth(env, c.env.DB);
 
 	return auth.handler(c.req.raw);
 });
 
 app.use("/rpc/*", async (c) => {
 	const env = parseServerEnv(c.env);
-	const auth = createAuth({
-		secret: env.BETTER_AUTH_SECRET,
-		baseURL: env.BETTER_AUTH_URL,
-		d1: c.env.DB,
-		trustedOrigins: ["xhs://", env.CORS_ORIGIN, ...env.CORS_ORIGINS.split(",")]
-			.map((origin) => origin.trim())
-			.filter(Boolean),
-	});
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	const viewerUserId = await resolveSessionUserId(
+		env,
+		c.env.DB,
+		c.req.raw.headers,
+	);
 	const origin = new URL(c.req.url).origin;
 	const { matched, response } = await rpcHandler.handle(c.req.raw, {
 		prefix: "/rpc",
 		context: {
 			notes: createNotesService(createDb(c.env.DB), origin),
-			viewerUserId: session?.user.id ?? null,
+			viewerUserId,
 		},
 	});
 
@@ -101,3 +95,4 @@ app.use("/rpc/*", async (c) => {
 
 app.route("/", imageRoutes);
 app.route("/", seedRoutes);
+app.route("/", uploadRoutes);
