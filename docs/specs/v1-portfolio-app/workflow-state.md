@@ -4,8 +4,8 @@
 
 ## 当前状态
 
-- **阶段**：P7（Alchemy 部署公网 + Native 线上 URL + 剧本验收 + README）—— **in-progress**
-- **总体状态**：P4 已通过验收；用户豁免审批，自动继续
+- **阶段**：P7（Alchemy 部署公网 + Native 线上 URL + 剧本验收 + README）—— **in-progress（已恢复）**
+- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；继续 P7
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
 
