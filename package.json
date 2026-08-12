@@ -29,7 +29,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.6",
+		"@types/node": "catalog:",
 		"@xhs/config": "workspace:*",
+		"alchemy": "^2.0.0-beta.70",
 		"lefthook": "^2.1.10",
 		"turbo": "^2.10.7",
 		"typescript": "^6.0.3"

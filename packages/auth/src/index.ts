@@ -1,2 +1,1 @@
-// better-auth 配置工厂（P2 填充）
-export {};
+export { type Auth, type CreateAuthOptions, createAuth } from "./auth";
