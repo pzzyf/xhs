@@ -2,8 +2,9 @@ import { useRouter } from "expo-router";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { NoteCard } from "@/components/note-card";
+import { PageHeader } from "@/components/page-header";
 import { useAuth } from "@/features/auth/auth-provider";
-import { NoteCard } from "@/features/notes/note-card";
 import { flattenNotePages, useNotesList } from "@/features/notes/queries";
 import { useTheme } from "@/providers/theme-provider";
 
@@ -32,24 +33,22 @@ export default function HomeScreen() {
 		<SafeAreaView
 			style={[styles.container, { backgroundColor: colors.background }]}
 		>
-			<View style={styles.header}>
-				<View>
-					<Text style={[styles.eyebrow, { color: colors.accent }]}>
-						发现灵感
-					</Text>
-					<Text style={[styles.title, { color: colors.foreground }]}>首页</Text>
-				</View>
-				<Pressable
-					onPress={openPublish}
-					style={({ pressed }) => [
-						styles.publishButton,
-						{ backgroundColor: colors.accent },
-						pressed && styles.pressed,
-					]}
-				>
-					<Text style={styles.publishText}>发布</Text>
-				</Pressable>
-			</View>
+			<PageHeader
+				title="首页"
+				eyebrow="发现灵感"
+				action={
+					<Pressable
+						onPress={openPublish}
+						style={({ pressed }) => [
+							styles.publishButton,
+							{ backgroundColor: colors.accent },
+							pressed && styles.pressed,
+						]}
+					>
+						<Text style={styles.publishText}>发布</Text>
+					</Pressable>
+				}
+			/>
 
 			<FlatList
 				data={notes}
@@ -140,12 +139,6 @@ function FeedMessage({
 
 const styles = StyleSheet.create({
 	container: { flex: 1, paddingHorizontal: 20 },
-	header: {
-		alignItems: "center",
-		flexDirection: "row",
-		justifyContent: "space-between",
-		paddingVertical: 18,
-	},
 	row: { gap: 12 },
 	column: { flex: 1 },
 	listContent: { gap: 12, paddingBottom: 28 },
@@ -154,8 +147,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 20,
 		textAlign: "center",
 	},
-	eyebrow: { fontSize: 13, fontWeight: "700", marginBottom: 4 },
-	title: { fontSize: 30, fontWeight: "800" },
 	publishButton: {
 		borderRadius: 999,
 		paddingHorizontal: 20,
