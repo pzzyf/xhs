@@ -1,6 +1,7 @@
 // @ts-expect-error Bun test types are not a package dependency.
 import { describe, expect, test } from "bun:test";
 import {
+	likesToggleInputSchema,
 	noteIdInputSchema,
 	notesCreateInputSchema,
 	notesListInputSchema,
@@ -87,4 +88,19 @@ describe("notes create input", () => {
 			notesCreateInputSchema.safeParse({ ...valid, imageKey: "" }).success,
 		).toBe(false);
 	});
+});
+
+describe("likes toggle input", () => {
+	test("accepts a positive note id", () => {
+		expect(likesToggleInputSchema.parse({ noteId: "16" })).toEqual({
+			noteId: "16",
+		});
+	});
+
+	test.each(["", "0", "-1", "abc"])(
+		"rejects invalid note id %s",
+		(noteId: string) => {
+			expect(likesToggleInputSchema.safeParse({ noteId }).success).toBe(false);
+		},
+	);
 });

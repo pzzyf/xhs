@@ -34,6 +34,15 @@ export const notesCreateInputSchema = z.object({
 	imageKey: z.string().min(1).max(200),
 });
 
+export const likesToggleInputSchema = z.object({
+	noteId: positiveIdStringSchema,
+});
+
+export const likesToggleOutputSchema = z.object({
+	liked: z.boolean(),
+	likeCount: z.number().int().nonnegative(),
+});
+
 export const healthContract = oc.output(z.object({ ok: z.literal(true) }));
 
 export const notesListContract = oc.input(notesListInputSchema).output(
@@ -51,6 +60,10 @@ export const notesCreateContract = oc
 	.input(notesCreateInputSchema)
 	.output(noteDetailSchema);
 
+export const likesToggleContract = oc
+	.input(likesToggleInputSchema)
+	.output(likesToggleOutputSchema);
+
 export const apiContract = {
 	health: healthContract,
 	notes: {
@@ -58,11 +71,15 @@ export const apiContract = {
 		get: notesGetContract,
 		create: notesCreateContract,
 	},
+	likes: {
+		toggle: likesToggleContract,
+	},
 };
 
 export type NoteListItem = z.infer<typeof noteListItemSchema>;
 export type NoteDetail = z.infer<typeof noteDetailSchema>;
 export type NoteCreateInput = z.infer<typeof notesCreateInputSchema>;
+export type LikesToggleOutput = z.infer<typeof likesToggleOutputSchema>;
 export type NotesListOutput = {
 	items: NoteListItem[];
 	nextCursor: string | null;
