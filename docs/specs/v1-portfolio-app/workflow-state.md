@@ -4,38 +4,36 @@
 
 ## 当前状态
 
-- **阶段**：P0（仓库清空 + monorepo 骨架）—— **暂停，次日继续**
-- **总体状态**：scaffolding（P0 删除与骨架重建已完成，健康检查初验成功，未收尾）
+- **阶段**：P0（仓库清空 + monorepo 骨架）—— **awaiting-human-review**
+- **总体状态**：scaffolding complete（健康检查已验证；待用户批准进入 P1）
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
 
-## 暂停记录（2026-08-12，用户叫停，次日继续）
+## P0 收尾（2026-08-12）
 
 已完成：
 
 - 规格 scaffold：requirements.md / spec.md / plan/P0–P7.md / workflow-state.md
-- 用户确认全删重来 → 删除旧 apps/*、packages/* 业务实现、旧 docs/specs/api-contract、旧 AGENTS.md/readme.md（保留 .git）
-- 重建骨架：packages/env（zod env）、packages/api（oRPC contract 壳）、packages/db（Drizzle 占位）、packages/auth（占位）、packages/infra（alchemy.run.ts：D1 xhs-d1 + R2 xhs-images + Worker xhs-server）、apps/server（Hono worker + CORS + 健康检查）、apps/native（Expo Router 壳 + Query/Theme/HeroUI provider）
-- `bun run check-types` 全绿；Biome check 通过；`expo install --check` 通过
-- `alchemy dev` 本地起服务成功：`GET /` 健康检查可访问（输出 `{ url: "http://localhost:3000" }`）
+- 用户确认全删重来 → 删除旧 apps/*、packages/* 业务实现、旧 docs/specs、旧 AGENTS/readme（保留 .git）
+- 重建骨架：packages/env、api、db、auth、infra；apps/server（Hono + 健康检查）；apps/native（Expo Router + Query/Theme/HeroUI）
+- 根 `AGENTS.md`、`README.md` 已与 V1 一致
+- 修复 `packages/infra/alchemy.run.ts`：`main` 相对仓库根 cwd 解析（`./apps/server/src/worker.ts`），否则 `alchemy dev` 只监听不响应
+- 验证：
+  - `bun run check-types`：6/6 全绿
+  - `bunx biome check`：通过
+  - `bun run dev:server` → `GET http://127.0.0.1:3000/` → `{"ok":true,"name":"xhs-server",...}`（需 `curl --noproxy '*'` 若本机有 HTTP 代理）
 
-未完成（下次继续）：
+环境事实：
 
-- P0 收尾：健康检查输出记录、awaiting-human-review 汇报
-- 根 `AGENTS.md`、`README.md` 重写（P0 计划内，尚未执行）
-- P1 起全部阶段
-
-注意（下次继续时的环境事实）：
-
-- `apps/server/.env` 已建本地开发密钥（gitignored，不入库）
-- `packages/infra/.env` 未建（部署时才需要 Cloudflare 凭据，需用户授权）
-- `packages/db/migrations` 目录已建（Alchemy dev 要求存在）
+- `apps/server/.env` 已建（gitignored）
+- `packages/infra/.env` 未建（部署时才需要）
+- `packages/db/migrations` 目录已建（可为空，Alchemy dev 要求存在）
 
 ## 检查点记录
 
 | 阶段 | 状态 | 日期 | 验收方式 | 结果 |
 |------|------|------|----------|------|
-| P0 | awaiting-human-review（待删除确认） | — | `bun run check-types` + scoped Biome | — |
+| P0 | awaiting-human-review | 2026-08-12 | `check-types` + Biome + `GET /` 健康检查 | 通过 |
 | P1 | pending | — | alchemy dev 健康检查 + 本地 D1 数据 | — |
 | P2 | pending | — | 注册/登录/登出全流程 | — |
 | P3 | pending | — | 双列流 + 详情连真实 D1 | — |
@@ -46,9 +44,8 @@
 
 ## 待办（当前步骤）
 
-1. P0 收尾汇报（健康检查初验已通过，awaiting-human-review）。
-2. 重写根 `AGENTS.md`、`README.md`。
-3. 用户批准后进入 P1（Alchemy 资源 + Drizzle schema/migrate/seed），依此类推至 P7。
+1. **用户审查并批准 P0**（本文件 + 骨架结构 + 健康检查结果）。
+2. 用户批准后进入 P1（Alchemy 资源 + Drizzle schema/migrate/seed）。
 
 ## 已确认决策摘要
 

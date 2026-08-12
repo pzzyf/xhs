@@ -24,7 +24,8 @@ export const IMAGES = Cloudflare.R2.Bucket("IMAGES", {
 
 export const Worker = Cloudflare.Worker("xhs-server", {
 	name: "xhs-server",
-	main: "../../apps/server/src/worker.ts",
+	// alchemy 从仓库根目录执行，main 相对 cwd（非本文件）解析
+	main: "./apps/server/src/worker.ts",
 	compatibility: {
 		// 本地 workerd 二进制支持的兼容日期上限，需保持在此日期以下
 		date: "2026-07-11",
