@@ -1,5 +1,4 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -12,7 +11,6 @@ export default function HomeScreen() {
 	const router = useRouter();
 	const { user } = useAuth();
 	const { colors } = useTheme();
-	const [notice, setNotice] = useState<string | null>(null);
 	const query = useNotesList();
 	const notes = flattenNotePages(query.data?.pages);
 
@@ -21,7 +19,7 @@ export default function HomeScreen() {
 			router.push("/sign-in");
 			return;
 		}
-		setNotice("发布功能将在下一阶段开放");
+		router.push("/publish");
 	};
 
 	const loadNextPage = () => {
@@ -52,10 +50,6 @@ export default function HomeScreen() {
 					<Text style={styles.publishText}>发布</Text>
 				</Pressable>
 			</View>
-
-			{notice ? (
-				<Text style={[styles.notice, { color: colors.accent }]}>{notice}</Text>
-			) : null}
 
 			<FlatList
 				data={notes}
