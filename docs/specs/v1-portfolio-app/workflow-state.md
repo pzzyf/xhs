@@ -30,10 +30,12 @@
 - 原生点赞录证：note 16 点赞 3→4（已赞·点击取消）→ 取消 4→3；`likes/toggle` 均 200
 - 原生退出录证：设置页退出 → sign-out 200 → 匿名 get-session；我的页回「去登录」，发布页重定向登录（写操作门禁）
 - UI 修复：详情页底部 padding 加大（Android 系统导航条遮挡点赞区）
+- 原生发布录证（Maestro 端到端）：选图 → 裁剪 → 上传 200 → 创建 200 → 笔记 id=22「Maestro 原生发布」落线上 D1 → R2 图片 200 → 首页与「我的」可见
+- **原生上传 Bug 修复**：RN fetch 拒绝 `{uri,type,name}` 对象体（Unsupported BodyInit type）；改用 `expo-file-system` 的 `File.arrayBuffer()`，安装 `expo-file-system@57.0.2`
 
 未完成（如实记录）：
 
-- 模拟器完整录证仅差原生发布（本环境 adb 输入不稳定，图片选择与登录后重试未录；发布 API 链路已在 Web/HTTP 线上复验）；iOS 模拟器未跑
+- Android 模拟器原生全流程（注册/发布/点赞/我的/退出）已录证；iOS 模拟器无头环境未能连上 Metro，待有界面环境补录
 - 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
