@@ -73,7 +73,7 @@ bun run alchemy:plan && bun run alchemy:deploy -- --yes
 
 ## 线上验收剧本
 
-`docs/specs/v1-portfolio-app/requirements.md` §4 的 AC-01…AC-10：本地 alchemy + Expo Web 全量走通；并已针对线上 URL 复验（经本机 HTTP 代理访问公网 Worker；Web 会话经同源面纱 + Cookie 翻译完成），注册/发布/点赞/我的/设置/退出全绿、控制台 0 error。Android 模拟器（Expo Go）已启动并打到同一线上 API；iOS 模拟器与原生完整剧本待补。注意：直连 `*.workers.dev` 在部分网络不可达，验收需代理或自定义域名。
+`docs/specs/v1-portfolio-app/requirements.md` §4 的 AC-01…AC-10：本地 alchemy + Expo Web 全量走通；并已针对线上 URL 复验（经本机 HTTP 代理访问公网 Worker；Web 会话经同源面纱 + Cookie 翻译完成），注册/发布/点赞/我的/设置/退出全绿、控制台 0 error。Android 模拟器（Expo Go）已启动并打到同一线上 API；服务端已放行 `exp://` origin（Expo Go 原生登录）；iOS 模拟器与原生完整剧本待补。注意：直连 `*.workers.dev` 在部分网络不可达，验收需代理或自定义域名。
 
 ## 安全与约定
 

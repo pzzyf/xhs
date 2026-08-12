@@ -15,6 +15,8 @@ export function createAppAuth(vars: AuthVars, db: D1Database) {
 		d1: db,
 		trustedOrigins: [
 			"xhs://",
+			// Expo Go 开发版使用 exp://<host>:<port> 作为 origin
+			"exp://",
 			vars.CORS_ORIGIN,
 			...vars.CORS_ORIGINS.split(","),
 		]

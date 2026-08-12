@@ -4,8 +4,8 @@
 
 ## 当前状态
 
-- **阶段**：P7 —— **deployed**（公网 HTTP + Web 线上主路径通过；模拟器完整录证部分完成）
-- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成并通过公网 HTTP/Web 线上验收；Android 模拟器已打到同一线上 API；iOS 模拟器未跑
+- **阶段**：P7 —— **deployed**（公网 HTTP + Web 线上主路径通过；Android 模拟器已打到同一线上 API）
+- **总体状态**：P0–P6 完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；P7 部署完成并通过公网 HTTP/Web 线上验收；Android 模拟器已打到同一线上 API；iOS 模拟器与原生完整剧本待补
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
 
@@ -25,10 +25,11 @@
 - 公网 HTTP 全链路：signup/upload/create（新笔记置顶）/likes toggle/me.notes/me.profile/匿名 401 全部通过
 - Web 线上全量 AC-01…AC-09（经同源面纱 http://localhost:3001 → 公网 Worker，Cookie 双向翻译）：全绿，控制台 0 error
 - Android 模拟器（Pixel_8_API_36 + Expo Go 57.0.3）：首页双列流/详情数据来自生产 D1/R2；原生「未登录点赞→登录页」通过
+- 修复：`trustedOrigins` 增加 `exp://`（Expo Go 开发 origin；此前原生注册被 403，公网 curl 复验 expo-origin 注册 200）
 
 未完成（如实记录）：
 
-- 模拟器完整录证仅部分：Android 原生注册/发布/点赞/退出的完整 UI 剧本未录（adb 自动化不稳，线上 D1 无对应测试账号）；iOS 模拟器未跑
+- 模拟器完整录证仅部分：Android 原生注册/发布/点赞/退出的完整 UI 剧本未录（本环境 adb 自动化不稳；服务端 expo-origin 注册已复验）；iOS 模拟器未跑
 - 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
