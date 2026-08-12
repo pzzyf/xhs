@@ -4,10 +4,25 @@
 
 ## 当前状态
 
-- **阶段**：P5（点赞 toggle + 登录拦截）—— **in-progress**
+- **阶段**：P6（我的主页 + 设置退出 + UI 打磨）—— **in-progress**
 - **总体状态**：P4 已通过验收；用户豁免审批，自动继续
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P5 收尾（2026-08-12）
+
+已完成：
+
+- 契约 `likes.toggle({ noteId })` → `{ liked, likeCount }`；未登录 401、不存在笔记 404
+- `notes-service.toggleLike`：like 行存在则删、否则插入（likes 复合主键保证一人一赞幂等）；返回最新赞态与 `count(*)`
+- 详情页赞按钮交互：未登录显示计数 +「登录后点赞」，点击跳登录（登录成功回首页，NG-17）；已登录乐观更新（pending 禁点）+ 失败回滚 + Toast；`useMutation` 就地更新缓存
+
+验证（`alchemy dev` + Metro Web :8081）：
+
+- `bun test` 78/78 通过（13 files）；`check-types` 6/6；Biome 37 文件 0 诊断
+- HTTP：toggle1 `{liked:true,likeCount:1}` → toggle2 `{liked:false,likeCount:0}`；匿名 401；不存在笔记 404；重新读取详情状态一致
+- Web（headless Chromium）：未登录详情见「点赞 · 0 + 登录后点赞」→ 点击跳登录；注册后回首页再进详情 → 点赞「已赞 · 1 / 点击取消」→ 取消「点赞 · 0 / 点击点赞」→ 重进详情一致；控制台 0 error
+- 截图：`/tmp/p5-detail-liked.png`
 
 ## P4 收尾（2026-08-12）
 
@@ -124,14 +139,14 @@
 | P2 | 完成 | 2026-08-12 | HTTP + Web 注册/登录/会话保持/登出 | 通过 |
 | P3 | 完成 | 2026-08-12 | HTTP RPC + Web 双列流/详情/错误态 | 通过（用户豁免审查） |
 | P4 | 完成 | 2026-08-12 | HTTP 上传/创建 + Web 发布全流程 | 通过 |
-| P5 | pending | — | 点赞 toggle 幂等 + 登录拦截 | — |
+| P5 | 完成 | 2026-08-12 | HTTP toggle + Web 点赞/取消/重进一致 | 通过 |
 | P6 | pending | — | 我的/设置/退出 + UI 打磨 | — |
 | P7 | pending | — | 公网部署 + 模拟器线上验收（AC-01…10） | — |
 
 ## 待办（当前步骤）
 
-1. **实施 P5**：点赞 toggle 幂等 + 登录拦截 + 回首页策略。
-2. P5 完成后依次实施 P6（我的/设置）、P7（公网部署验收）。
+1. **实施 P6**：我的主页（已发布笔记/赞过）+ 设置退出 + 中文 UI 打磨。
+2. P6 完成后实施 P7（公网部署验收）。
 
 ## 已确认决策摘要
 
