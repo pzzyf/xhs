@@ -1,9 +1,11 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/features/auth/auth-provider";
+import { NoteCard } from "@/features/notes/note-card";
+import { flattenNotePages, useNotesList } from "@/features/notes/queries";
 import { useTheme } from "@/providers/theme-provider";
 
 export default function HomeScreen() {
@@ -11,6 +13,8 @@ export default function HomeScreen() {
 	const { user } = useAuth();
 	const { colors } = useTheme();
 	const [notice, setNotice] = useState<string | null>(null);
+	const query = useNotesList();
+	const notes = flattenNotePages(query.data?.pages);
 
 	const openPublish = () => {
 		if (!user) {
@@ -18,6 +22,12 @@ export default function HomeScreen() {
 			return;
 		}
 		setNotice("发布功能将在下一阶段开放");
+	};
+
+	const loadNextPage = () => {
+		if (query.hasNextPage && !query.isFetchingNextPage) {
+			void query.fetchNextPage();
+		}
 	};
 
 	return (
@@ -43,25 +53,94 @@ export default function HomeScreen() {
 				</Pressable>
 			</View>
 
-			<View
-				style={[
-					styles.emptyCard,
-					{ backgroundColor: colors.surface, borderColor: colors.border },
-				]}
-			>
-				<Text style={[styles.emptyTitle, { color: colors.foreground }]}>
-					内容正在路上
-				</Text>
-				<Text style={[styles.emptyBody, { color: colors.muted }]}>
-					下一阶段将接入真实双列信息流
-				</Text>
-				{notice ? (
-					<Text style={[styles.notice, { color: colors.accent }]}>
-						{notice}
-					</Text>
-				) : null}
-			</View>
+			{notice ? (
+				<Text style={[styles.notice, { color: colors.accent }]}>{notice}</Text>
+			) : null}
+
+			<FlatList
+				data={notes}
+				keyExtractor={(note) => note.id}
+				numColumns={2}
+				columnWrapperStyle={styles.row}
+				contentContainerStyle={styles.listContent}
+				renderItem={({ item }) => (
+					<View style={styles.column}>
+						<NoteCard
+							note={item}
+							onPress={(id) => router.push(`/note/${id}`)}
+						/>
+					</View>
+				)}
+				onEndReached={loadNextPage}
+				onEndReachedThreshold={0.35}
+				ListEmptyComponent={
+					query.isPending ? (
+						<FeedMessage title="正在加载内容" body="马上就好" />
+					) : query.isError ? (
+						<FeedMessage
+							title="内容加载失败"
+							body="请检查网络后重试"
+							actionLabel="重新加载"
+							onAction={() => void query.refetch()}
+						/>
+					) : (
+						<FeedMessage title="还没有内容" body="稍后再来看看吧" />
+					)
+				}
+				ListFooterComponent={
+					query.isFetchingNextPage ? (
+						<Text style={[styles.footer, { color: colors.muted }]}>
+							正在加载更多
+						</Text>
+					) : query.isFetchNextPageError ? (
+						<Pressable onPress={() => void query.fetchNextPage()}>
+							<Text style={[styles.footer, { color: colors.accent }]}>
+								加载失败，点击重试
+							</Text>
+						</Pressable>
+					) : notes.length > 0 && !query.hasNextPage ? (
+						<Text style={[styles.footer, { color: colors.muted }]}>
+							已经到底了
+						</Text>
+					) : null
+				}
+			/>
 		</SafeAreaView>
+	);
+}
+
+function FeedMessage({
+	title,
+	body,
+	actionLabel,
+	onAction,
+}: {
+	title: string;
+	body: string;
+	actionLabel?: string;
+	onAction?: () => void;
+}) {
+	const { colors } = useTheme();
+
+	return (
+		<View
+			style={[
+				styles.emptyCard,
+				{ backgroundColor: colors.surface, borderColor: colors.border },
+			]}
+		>
+			<Text style={[styles.emptyTitle, { color: colors.foreground }]}>
+				{title}
+			</Text>
+			<Text style={[styles.emptyBody, { color: colors.muted }]}>{body}</Text>
+			{actionLabel && onAction ? (
+				<Pressable onPress={onAction}>
+					<Text style={[styles.notice, { color: colors.accent }]}>
+						{actionLabel}
+					</Text>
+				</Pressable>
+			) : null}
+		</View>
 	);
 }
 
@@ -72,6 +151,14 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingVertical: 18,
+	},
+	row: { gap: 12 },
+	column: { flex: 1 },
+	listContent: { gap: 12, paddingBottom: 28 },
+	footer: {
+		fontSize: 13,
+		paddingVertical: 20,
+		textAlign: "center",
 	},
 	eyebrow: { fontSize: 13, fontWeight: "700", marginBottom: 4 },
 	title: { fontSize: 30, fontWeight: "800" },
