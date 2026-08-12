@@ -2,7 +2,9 @@
 import { describe, expect, test } from "bun:test";
 import {
 	likesToggleInputSchema,
+	meProfileOutputSchema,
 	noteIdInputSchema,
+	noteListItemSchema,
 	notesCreateInputSchema,
 	notesListInputSchema,
 } from "./contract";
@@ -103,4 +105,33 @@ describe("likes toggle input", () => {
 			expect(likesToggleInputSchema.safeParse({ noteId }).success).toBe(false);
 		},
 	);
+});
+
+describe("me contract outputs", () => {
+	test("accepts a profile payload", () => {
+		expect(
+			meProfileOutputSchema.parse({
+				id: "user-1",
+				name: "体验官小艾",
+				email: "demo@xhs.dev",
+				image: null,
+			}),
+		).toEqual({
+			id: "user-1",
+			name: "体验官小艾",
+			email: "demo@xhs.dev",
+			image: null,
+		});
+	});
+
+	test("accepts note list items", () => {
+		const item = {
+			id: "16",
+			title: "周末咖啡馆打卡",
+			coverUrl: "https://example.com/images/seed/note-01.png",
+			authorName: "体验官小艾",
+			createdAt: "2026-08-12T00:00:00.000Z",
+		};
+		expect(noteListItemSchema.parse(item)).toEqual(item);
+	});
 });
