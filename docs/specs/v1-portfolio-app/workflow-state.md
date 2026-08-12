@@ -26,10 +26,14 @@
 - Web 线上全量 AC-01…AC-09（经同源面纱 http://localhost:3001 → 公网 Worker，Cookie 双向翻译）：全绿，控制台 0 error
 - Android 模拟器（Pixel_8_API_36 + Expo Go 57.0.3）：首页双列流/详情数据来自生产 D1/R2；原生「未登录点赞→登录页」通过
 - 修复：`trustedOrigins` 增加 `exp://`（Expo Go 开发 origin；此前原生注册被 403，公网 curl 复验 expo-origin 注册 200）
+- 原生注册录证：模拟器注册成功创建账号 `AndroidFinal`（线上 D1 确认），面纱日志 sign-up 200 → get-session(cookie) 200 → 鉴权列表 200
+- 原生点赞录证：note 16 点赞 3→4（已赞·点击取消）→ 取消 4→3；`likes/toggle` 均 200
+- 原生退出录证：设置页退出 → sign-out 200 → 匿名 get-session；我的页回「去登录」，发布页重定向登录（写操作门禁）
+- UI 修复：详情页底部 padding 加大（Android 系统导航条遮挡点赞区）
 
 未完成（如实记录）：
 
-- 模拟器完整录证仅部分：Android 原生注册/发布/点赞/退出的完整 UI 剧本未录（本环境 adb 自动化不稳；服务端 expo-origin 注册已复验）；iOS 模拟器未跑
+- 模拟器完整录证仅差原生发布（本环境 adb 输入不稳定，图片选择与登录后重试未录；发布 API 链路已在 Web/HTTP 线上复验）；iOS 模拟器未跑
 - 直连 `*.workers.dev` 在本网被阻断（连 workers.dev 根域也 reset），线上复验依赖本机代理/面纱；正式公网使用建议绑定自定义域名
 
 ## P6 收尾（2026-08-12）
