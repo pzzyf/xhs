@@ -42,6 +42,7 @@ describe("rpc router", () => {
 				})),
 			}),
 			get: async () => null,
+			create: async () => detailResult,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -58,6 +59,7 @@ describe("rpc router", () => {
 		const notes = {
 			list: async () => listResult,
 			get: async () => null,
+			create: async () => detailResult,
 		} satisfies NotesService;
 
 		await expect(
@@ -77,6 +79,7 @@ describe("rpc router", () => {
 				title: `${id}:${viewerUserId}`,
 				viewerHasLiked: viewerUserId === "viewer-1",
 			}),
+			create: async () => detailResult,
 		} satisfies NotesService;
 
 		const output = await call(
@@ -87,5 +90,52 @@ describe("rpc router", () => {
 
 		expect(output.title).toBe("16:viewer-1");
 		expect(output.viewerHasLiked).toBeTrue();
+	});
+
+	test("forwards create input to the notes service for an authenticated viewer", async () => {
+		let receivedAuthorId = "";
+		const notes = {
+			list: async () => listResult,
+			get: async () => null,
+			create: async (input, authorId) => {
+				receivedAuthorId = authorId;
+				return { ...detailResult, title: input.title };
+			},
+		} satisfies NotesService;
+
+		const output = await call(
+			rpcRouter.notes.create,
+			{
+				title: "新发布",
+				body: "正文",
+				tags: ["咖啡"],
+				imageKey: "notes/new-1.jpg",
+			},
+			{ context: { notes, viewerUserId: "author-1" } },
+		);
+
+		expect(output.title).toBe("新发布");
+		expect(receivedAuthorId).toBe("author-1");
+	});
+
+	test("rejects create without a viewer session", async () => {
+		const notes = {
+			list: async () => listResult,
+			get: async () => null,
+			create: async () => detailResult,
+		} satisfies NotesService;
+
+		await expect(
+			call(
+				rpcRouter.notes.create,
+				{
+					title: "新发布",
+					body: "正文",
+					tags: [],
+					imageKey: "notes/new-1.jpg",
+				},
+				{ context: { notes, viewerUserId: null } },
+			),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 	});
 });

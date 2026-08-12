@@ -30,6 +30,21 @@ class FakeD1 {
 	}
 
 	private execute(sql: string, params: unknown[]): unknown[][] {
+		if (sql.includes('insert into "notes"')) {
+			const [authorId, title, body, tags, imageKey, createdAt] = params;
+			const nextId = Math.max(0, ...this.notes.map((note) => note.id)) + 1;
+			this.notes.push({
+				id: nextId,
+				authorId: String(authorId),
+				title: String(title),
+				body: String(body),
+				tags: String(tags),
+				imageKey: String(imageKey),
+				createdAt: Number(createdAt),
+			});
+			return [[nextId]];
+		}
+
 		if (sql.includes('from "notes" inner join "user"')) {
 			if (sql.includes('"notes"."body"')) {
 				const note = this.notes.find(({ id }) => id === Number(params[0]));
@@ -226,6 +241,31 @@ describe("notes service", () => {
 		const service = createNotesService(fakeDb, "https://api.example.com");
 
 		expect(await service.get("999", null)).toBeNull();
+	});
+
+	test("creates a note and returns its detail", async () => {
+		const service = createNotesService(fakeDb, "https://api.example.com");
+
+		const output = await service.create(
+			{
+				title: "新发布",
+				body: "刚刚发布的正文",
+				tags: ["新标签"],
+				imageKey: "notes/new-1.jpg",
+			},
+			"author-1",
+		);
+
+		expect(output.id).toBe("12");
+		expect(output.title).toBe("新发布");
+		expect(output.body).toBe("刚刚发布的正文");
+		expect(output.tags).toEqual(["新标签"]);
+		expect(output.authorId).toBe("author-1");
+		expect(output.likeCount).toBe(0);
+		expect(output.viewerHasLiked).toBeFalse();
+
+		const listed = await service.list({ limit: 1 });
+		expect(listed.items[0]?.id).toBe("12");
 	});
 
 	test("rejects malformed stored tags", async () => {

@@ -23,5 +23,11 @@ export const rpcRouter = builder.router({
 			}
 			return note;
 		}),
+		create: builder.notes.create.handler(async ({ input, context }) => {
+			if (!context.viewerUserId) {
+				throw new ORPCError("UNAUTHORIZED", { message: "请先登录" });
+			}
+			return context.notes.create(input, context.viewerUserId);
+		}),
 	},
 });

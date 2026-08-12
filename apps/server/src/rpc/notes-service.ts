@@ -9,13 +9,21 @@ export type NotesListInput = {
 	limit: number;
 };
 
+export type NotesCreateInput = {
+	title: string;
+	body: string;
+	tags: string[];
+	imageKey: string;
+};
+
 export interface NotesService {
 	list(input: NotesListInput): Promise<NotesListOutput>;
 	get(id: string, viewerUserId: string | null): Promise<NoteDetail | null>;
+	create(input: NotesCreateInput, authorId: string): Promise<NoteDetail>;
 }
 
 export function createNotesService(db: Database, origin: string): NotesService {
-	return {
+	const service: NotesService = {
 		async list(input) {
 			const cursor = input.cursor ? Number(input.cursor) : undefined;
 			const rows = await db
@@ -95,5 +103,30 @@ export function createNotesService(db: Database, origin: string): NotesService {
 				authorId: row.authorId,
 			};
 		},
+
+		async create(input, authorId) {
+			const [inserted] = await db
+				.insert(notes)
+				.values({
+					authorId,
+					title: input.title,
+					body: input.body,
+					tags: JSON.stringify(input.tags),
+					imageKey: input.imageKey,
+					createdAt: Date.now(),
+				})
+				.returning({ id: notes.id });
+
+			if (!inserted) {
+				throw new Error("发布失败");
+			}
+			const note = await service.get(String(inserted.id), authorId);
+			if (!note) {
+				throw new Error("发布后读取笔记失败");
+			}
+			return note;
+		},
 	};
+
+	return service;
 }
