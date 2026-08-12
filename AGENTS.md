@@ -36,4 +36,4 @@
 
 ## 当前阶段
 
-P0–P6 已完成并验收；P7 已部署至公网（Worker + D1 + R2，`https://xhs-server.0624afe1.workers.dev`），线上端到端复验待可访问 `*.workers.dev` 的网络或自定义域名。里程碑 tag：P0–P5 对应 `v0.1.0`–`v0.6.0`。进度见 `docs/specs/v1-portfolio-app/workflow-state.md`。
+P0–P7 已完成并部署；v1.1.0：Web 静态产物与 API 同源托管于同一 Worker（`https://xhs-server.0624afe1.workers.dev`），16 张真实种子照片（Unsplash 授权）、体验账号 `demo@xhs.dev / demo123456`、Android APK 分发（GitHub Releases）已完成并线上复验。里程碑 tag：P0–P5 对应 `v0.1.0`–`v0.6.0`，v1.0.0 对应 P7，v1.1.0 对应本轮。⚠️ `alchemy dev` 后再 `alchemy deploy` 会触发 D1/R2 破坏性重建（详见 README 部署章节）。进度见 `docs/specs/v1-portfolio-app/workflow-state.md`。

@@ -7,6 +7,7 @@ import { logger } from "hono/logger";
 import { createAppAuth, resolveSessionUserId } from "./auth";
 import { imageRoutes } from "./routes/images";
 import { seedRoutes } from "./routes/seed";
+import { seedImageRoutes } from "./routes/seed-images";
 import { createUploadRoutes } from "./routes/upload";
 import { createNotesService } from "./rpc/notes-service";
 import { rpcRouter } from "./rpc/router";
@@ -95,4 +96,26 @@ app.use("/rpc/*", async (c) => {
 
 app.route("/", imageRoutes);
 app.route("/", seedRoutes);
+app.route("/", seedImageRoutes);
 app.route("/", uploadRoutes);
+
+// SPA 兜底（同源托管 Web 静态产物）：未匹配的 GET 深链（如 /note/123）
+// 返回 index.html 交给客户端路由；无 ASSETS 绑定（如纯 API 部署）时返回 404。
+// 注：ASSETS.fetch 返回 workers 类型 Response，需复制为 DOM Response 再返回。
+app.get("*", async (c) => {
+	if (!c.env.ASSETS) {
+		return c.notFound();
+	}
+
+	const assetResponse = await c.env.ASSETS.fetch(
+		new Request(new URL("/index.html", c.req.url)),
+	);
+	if (assetResponse.status !== 200) {
+		return c.notFound();
+	}
+
+	return new Response(assetResponse.body, {
+		status: assetResponse.status,
+		headers: assetResponse.headers,
+	});
+});

@@ -5,6 +5,8 @@ import { notes, user } from "./schema";
 export const DEMO_USER_ID = "seed_demo_user";
 export const DEMO_EMAIL = "demo@xhs.dev";
 export const DEMO_NAME = "体验官小艾";
+/** 体验账号密码（README 公开，非机密；仅供演示登录） */
+export const DEMO_PASSWORD = "demo123456";
 
 /** 16 条中文种子笔记（≥1.5 页，page size 10） */
 export const SEED_NOTES: Array<{

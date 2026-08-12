@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
@@ -26,6 +27,13 @@ export const Worker = Cloudflare.Worker("xhs-server", {
 	name: "xhs-server",
 	// alchemy 从仓库根目录执行，main 相对 cwd（非本文件）解析
 	main: "./apps/server/src/worker.ts",
+	// 同源托管 Expo Web 静态产物（apps/native/dist）；未构建时退化为纯 API
+	assets: existsSync(path.join(import.meta.dir, "../../apps/native/dist"))
+		? {
+				directory: "./apps/native/dist",
+				notFoundHandling: "single-page-application",
+			}
+		: undefined,
 	compatibility: {
 		// 本地 workerd 二进制支持的兼容日期上限，需保持在此日期以下
 		date: "2026-07-11",

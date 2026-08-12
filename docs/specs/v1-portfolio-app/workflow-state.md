@@ -4,10 +4,35 @@
 
 ## 当前状态
 
-- **阶段**：P7 —— **deployed（DoD 达成）**
-- **总体状态**：P0–P7 全部完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；公网 Worker + D1 + R2 已部署，Web/HTTP/Android 原生全流程/iOS 模拟器均打到同一线上 API 并录证
+- **阶段**：P7 + v1.1.0 —— **deployed（DoD 达成）**
+- **总体状态**：P0–P7 全部完成并提交；P3/P4/P5 已推 GitHub 并打 tag（v0.4.0/v0.5.0/v0.6.0）；v1.1.0（Web 同源托管 + 真实种子照片 + 体验账号 + Android APK 分发）已完成并部署，公网直连复验通过
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## v1.1.0 变更（2026-08-12）
+
+设计文档：`docs/superpowers/specs/2026-08-12-web-hosting-images-distribution-design.md`
+
+已完成并验证：
+
+- **Web 同源托管**：`expo export -p web` 产物挂到同一 Worker 的 `assets`（`notFoundHandling: single-page-application`），Web 与 API 同源（Cookie 无跨站问题）；Worker 增加 SPA 兜底路由（`env.ASSETS` 返回 index.html）；`CORS_ORIGINS` 追加公网 URL
+- **真实种子照片**：16 张 Unsplash 授权照片（主题贴合 16 条笔记）缩为 480×640 JPEG 入库 `packages/db/seed-photos/`；新增 `PUT /api/dev/seed/images/:key` 上传路由 + `bun run seed:images` 脚本；R2 已全部覆盖为真实照片（保留原 key）
+- **体验账号**：种子幂等补齐 credential，`demo@xhs.dev / demo123456` 可登录（Web/Android 均已验证）
+- **截图**：headless Chrome 线上直拍首页/详情/我的 → `docs/screenshots/`（控制台 0 error）
+- **Android 分发**：release APK（自签名 keystore，versionName 1.1.0）构建完成，模拟器安装启动零崩溃；随 GitHub Release 分发
+- **线上复验**（公网直连）：`/` 200 HTML、深链 `/note/16` 200 HTML（SPA）、`/images/seed/note-01.png` 200 image/jpeg、demo 登录 200、feed/详情/点赞链路通过；headless Chrome 全流程 0 error
+
+数据风险与恢复（如实记录）：
+
+- 本次部署期间两次出现 `alchemy plan` 的 `replace (local → live)`：`alchemy dev` 会把云端状态行写为 `local` 模式，后续 `alchemy deploy` 触发破坏性替换，D1/R2 被删除重建（P7 验收期的测试数据：AndroidFinal 用户、id=22 笔记等丢失）
+- 已通过重跑 seed 恢复（demo 用户+密码+16 条笔记），R2 已重传真实照片；部署后 state 已稳定（`plan` → noop）
+- README 部署章节已写明该风险与规避方式（dev/deploy 分离，部署后重跑 seed + seed:images）
+
+未完成（如实记录）：
+
+- iOS 安装包暂不提供（无 Apple 开发者账号；README 说明用 Web 版或 Expo Go 本地体验）
+- 直连 `*.workers.dev` 在部分网络被阻断（本机当前可直连），公网使用建议绑定自定义域名
+- Android APK 108MB 偏大（未开 R8 精简与 split-per-abi），后续可优化
 
 ## P7 收尾（2026-08-12）
 

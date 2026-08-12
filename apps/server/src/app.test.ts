@@ -110,4 +110,58 @@ describe("server app HTTP boundaries", () => {
 
 		expect(response.status).toBe(500);
 	});
+
+	test("serves index.html for unmatched GET deep links when ASSETS is bound", async () => {
+		const env = {
+			...envWithBindings(),
+			ASSETS: {
+				fetch: async (request: Request) => {
+					expect(new URL(request.url).pathname).toBe("/index.html");
+					return new Response("<!doctype html><html></html>", {
+						status: 200,
+						headers: { "content-type": "text/html" },
+					});
+				},
+			},
+		} as unknown as ServerEnv;
+
+		const response = await app.fetch(
+			new Request("http://localhost/note/123", { method: "GET" }),
+			env,
+		);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("content-type")).toContain("text/html");
+		expect(await response.text()).toContain("<!doctype html>");
+	});
+
+	test("returns 404 for unmatched GET deep links without an ASSETS binding", async () => {
+		const response = await app.fetch(
+			new Request("http://localhost/note/123", { method: "GET" }),
+			envWithBindings(),
+		);
+
+		expect(response.status).toBe(404);
+	});
+
+	test("does not let the SPA fallback swallow API routes", async () => {
+		const bucket = {
+			get: async () => null,
+		} as unknown as R2Bucket;
+		const env = {
+			...envWithBindings({ bucket }),
+			ASSETS: {
+				fetch: async () => new Response("html", { status: 200 }),
+			},
+		} as unknown as ServerEnv;
+
+		const response = await app.fetch(
+			new Request("http://localhost/images/missing.png", { method: "GET" }),
+			env,
+		);
+
+		expect(response.status).toBe(404);
+		const body: unknown = await response.json();
+		expect(body).toEqual({ ok: false, error: "图片不存在" });
+	});
 });

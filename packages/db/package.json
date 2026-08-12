@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"check-types": "tsc --noEmit",
-		"db:generate": "drizzle-kit generate"
+		"db:generate": "drizzle-kit generate",
+		"seed:images": "bun src/upload-seed-images.ts"
 	},
 	"exports": {
 		".": "./src/index.ts",

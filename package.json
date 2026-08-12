@@ -19,6 +19,8 @@
 		"check-types": "turbo run check-types",
 		"dev:native": "bun run --cwd apps/native dev",
 		"dev:server": "bun run alchemy:dev",
+		"build:web": "bun run --cwd apps/native export:web",
+		"seed:images": "bun run --cwd packages/db seed:images",
 		"alchemy": "alchemy packages/infra/alchemy.run.ts",
 		"alchemy:dev": "alchemy dev packages/infra/alchemy.run.ts",
 		"alchemy:plan": "alchemy plan packages/infra/alchemy.run.ts",
