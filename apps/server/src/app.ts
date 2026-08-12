@@ -2,6 +2,7 @@ import { parseServerEnv } from "@xhs/env";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { seedRoutes } from "./routes/seed";
 import type { ServerEnv } from "./types";
 
 const localOriginPattern =
@@ -46,3 +47,5 @@ app.get("/", (c) =>
 		time: new Date().toISOString(),
 	}),
 );
+
+app.route("/", seedRoutes);

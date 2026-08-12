@@ -4,10 +4,32 @@
 
 ## 当前状态
 
-- **阶段**：P0（仓库清空 + monorepo 骨架）—— **awaiting-human-review**
-- **总体状态**：scaffolding complete（健康检查已验证；待用户批准进入 P1）
+- **阶段**：P1（Alchemy 资源 + Drizzle Schema/Migrate/Seed）—— **awaiting-human-review**
+- **总体状态**：数据层就绪（迁移已应用、种子 16 条已验证；待用户批准进入 P2）
 - **提交策略**：user-managed（用户明确指示才 commit）
 - **权威需求**：`SUPERPOWER-BRIEF.md`（冻结）→ `requirements.md` / `spec.md`
+
+## P1 收尾（2026-08-12）
+
+已完成：
+
+- Drizzle schema（`packages/db/src/schema.ts`）：better-auth 核心表（user/session/account/verification，单数表名对齐 better-auth 默认）+ notes + likes（复合主键 noteId+userId）
+- `drizzle-kit generate` → `packages/db/migrations/0000_wooden_guardian.sql`（Alchemy 原生支持 `--> statement-breakpoint`）
+- `packages/db/src/index.ts`：`createDb(D1Database)` + Drizzle relations
+- 种子（`packages/db/src/seed.ts`）：demo@xhs.dev「体验官小艾」+ 16 条中文笔记（标签 2–4 个，时间倒序错开 1h）
+- 占位图（`packages/db/src/seed-images.ts`）：运行时生成 480×640 渐变 PNG（纯 TS + node:zlib，无外网图源）
+- 种子接口（`apps/server/src/routes/seed.ts`）：`POST /api/dev/seed`，`x-seed-secret` 头匹配 `SEED_SECRET` 才生效；幂等
+- 验证（本地 `alchemy dev`）：
+  - `[DB] update (local)` 迁移应用成功，`d1_migrations` 记录 0000
+  - `GET /` → 200 `{ ok: true }`
+  - seed → `{"ok":true,"skipped":false,"users":1,"notes":16,"imagesUploaded":16}`；二次调用 skipped；错误密钥 401
+  - sqlite 直查：user=1、notes=16、likes=0；R2 本地 16 个 blob
+  - `bun run check-types` 6/6 全绿；scoped Biome 通过
+
+环境事实：
+
+- `apps/server/.env` 的 `SEED_SECRET` 已配置（gitignored）
+- 本地 D1/R2 数据在 `.alchemy/local/`（gitignored）
 
 ## P0 收尾（2026-08-12）
 
@@ -33,8 +55,8 @@
 
 | 阶段 | 状态 | 日期 | 验收方式 | 结果 |
 |------|------|------|----------|------|
-| P0 | awaiting-human-review | 2026-08-12 | `check-types` + Biome + `GET /` 健康检查 | 通过 |
-| P1 | pending | — | alchemy dev 健康检查 + 本地 D1 数据 | — |
+| P0 | 完成（v0.1.0） | 2026-08-12 | `check-types` + Biome + `GET /` 健康检查 | 通过 |
+| P1 | awaiting-human-review | 2026-08-12 | alchemy dev 迁移 + 种子 + D1 直查 | 通过 |
 | P2 | pending | — | 注册/登录/登出全流程 | — |
 | P3 | pending | — | 双列流 + 详情连真实 D1 | — |
 | P4 | pending | — | 发布后列表可见（R2 图） | — |
@@ -44,8 +66,8 @@
 
 ## 待办（当前步骤）
 
-1. **用户审查并批准 P0**（本文件 + 骨架结构 + 健康检查结果）。
-2. 用户批准后进入 P1（Alchemy 资源 + Drizzle schema/migrate/seed）。
+1. **用户审查并批准 P1**（schema/迁移/种子 + 验证输出）。
+2. 用户批准后进入 P2（better-auth 注册/登录/登出）。
 
 ## 已确认决策摘要
 
