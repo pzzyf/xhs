@@ -1,5 +1,6 @@
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { NoteCard } from "@/components/note-card";
@@ -50,19 +51,14 @@ export default function HomeScreen() {
 				}
 			/>
 
-			<FlatList
+			<FlashList
 				data={notes}
 				keyExtractor={(note) => note.id}
+				masonry
 				numColumns={2}
-				columnWrapperStyle={styles.row}
 				contentContainerStyle={styles.listContent}
 				renderItem={({ item }) => (
-					<View style={styles.column}>
-						<NoteCard
-							note={item}
-							onPress={(id) => router.push(`/note/${id}`)}
-						/>
-					</View>
+					<NoteCard note={item} onPress={(id) => router.push(`/note/${id}`)} />
 				)}
 				onEndReached={loadNextPage}
 				onEndReachedThreshold={0.35}
@@ -139,9 +135,7 @@ function FeedMessage({
 
 const styles = StyleSheet.create({
 	container: { flex: 1, paddingHorizontal: 20 },
-	row: { gap: 12 },
-	column: { flex: 1 },
-	listContent: { gap: 12, paddingBottom: 28 },
+	listContent: { paddingBottom: 28 },
 	footer: {
 		fontSize: 13,
 		paddingVertical: 20,

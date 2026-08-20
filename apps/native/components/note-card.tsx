@@ -1,7 +1,10 @@
 import type { NoteListItem } from "@xhs/api";
+import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useTheme } from "@/providers/theme-provider";
+
+import { getMasonryCoverAspectRatio } from "./note-card-ratio";
 
 type NoteCardProps = {
 	note: NoteListItem;
@@ -10,6 +13,28 @@ type NoteCardProps = {
 
 export function NoteCard({ note, onPress }: NoteCardProps) {
 	const { colors } = useTheme();
+	const [aspectRatio, setAspectRatio] = useState(() =>
+		getMasonryCoverAspectRatio(note.id, 0, 0),
+	);
+
+	useEffect(() => {
+		let isActive = true;
+		setAspectRatio(getMasonryCoverAspectRatio(note.id, 0, 0));
+
+		Image.getSize(
+			note.coverUrl,
+			(width, height) => {
+				if (isActive) {
+					setAspectRatio(getMasonryCoverAspectRatio(note.id, width, height));
+				}
+			},
+			() => undefined,
+		);
+
+		return () => {
+			isActive = false;
+		};
+	}, [note.coverUrl, note.id]);
 
 	return (
 		<Pressable
@@ -22,7 +47,7 @@ export function NoteCard({ note, onPress }: NoteCardProps) {
 		>
 			<Image
 				source={{ uri: note.coverUrl }}
-				style={styles.cover}
+				style={[styles.cover, { aspectRatio }]}
 				resizeMode="cover"
 			/>
 			<View style={styles.copy}>
@@ -47,13 +72,14 @@ const styles = StyleSheet.create({
 	card: {
 		borderRadius: 18,
 		borderWidth: 1,
+		marginBottom: 12,
+		marginHorizontal: 6,
 		overflow: "hidden",
 	},
 	pressed: {
 		opacity: 0.72,
 	},
 	cover: {
-		aspectRatio: 3 / 4,
 		width: "100%",
 	},
 	copy: {
